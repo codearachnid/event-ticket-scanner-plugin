@@ -1,0 +1,42 @@
+.tec-scanner-columns {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	align-items: flex-start;
+	margin-top: 12px;
+}
+
+.tec-scanner-columns .card {
+	flex: 1 1 380px;
+	max-width: 560px;
+	padding: 16px 20px;
+}
+
+#tec-scanner-qr {
+	width: 280px;
+	height: 280px;
+	margin: 12px 0 4px;
+	background: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 10px;
+	box-sizing: content-box;
+}
+
+#tec-scanner-qr:empty::after {
+	content: '—';
+	color: #a7aaad;
+	font-size: 32px;
+}
+
+#tec-scanner-qr.is-expired {
+	opacity: 0.15;
+}
+
+.tec-scanner-status td:first-child {
+	width: 160px;
+	font-weight: 600;
+}
