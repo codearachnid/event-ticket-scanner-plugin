@@ -24,6 +24,9 @@ final class Assignments {
 
 	public const META_KEY = '_tec_scanner_event_id';
 
+	/** Marks a check-in capability this plugin added to the user directly. */
+	public const META_CAP_GRANTED = '_tec_scanner_cap_granted';
+
 	public static function register_hooks(): void {
 		// Don't leave assignments pointing at deleted events.
 		add_action( 'before_delete_post', [ self::class, 'purge_event' ] );
@@ -223,6 +226,8 @@ final class Assignments {
 			add_user_meta( $user_id, self::META_KEY, (string) $add );
 		}
 
+		self::refresh_checkin_cap( $user_id );
+
 		/**
 		 * Fires after a scanner user's event assignments change.
 		 *
@@ -230,6 +235,41 @@ final class Assignments {
 		 * @param int[] $event_ids Assigned event IDs after the change.
 		 */
 		do_action( 'tec_scanner_assignments_updated', $user_id, $valid );
+	}
+
+	/**
+	 * Giving somebody scope who can't check in yet (an event author, an
+	 * organizer's account) would otherwise be a silent no-op, so grant them the
+	 * capability directly on the user — scoped, as always, to that scope. The
+	 * grant is remembered so it can be withdrawn when the last of it goes, and
+	 * so a role-provided capability is never touched.
+	 *
+	 * Call after any change to assignments or organizer links.
+	 */
+	public static function refresh_checkin_cap( int $user_id ): void {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user ) {
+			return;
+		}
+
+		$has_scope = (bool) self::direct_for_user( $user_id ) || (bool) Organizers::organizer_ids_for_user( $user_id );
+		$granted   = (bool) get_user_meta( $user_id, self::META_CAP_GRANTED, true );
+
+		if ( $has_scope ) {
+			if ( ! $granted && ! user_can( $user, Plugin::CAP_CHECKIN ) ) {
+				$user->add_cap( Plugin::CAP_CHECKIN );
+				update_user_meta( $user_id, self::META_CAP_GRANTED, 1 );
+			}
+
+			return;
+		}
+
+		// Nothing left in scope. Only ever remove a capability this plugin added.
+		if ( $granted ) {
+			$user->remove_cap( Plugin::CAP_CHECKIN );
+			delete_user_meta( $user_id, self::META_CAP_GRANTED );
+		}
 	}
 
 	public static function assign( int $user_id, int $event_id ): void {

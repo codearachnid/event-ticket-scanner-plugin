@@ -45,6 +45,7 @@ final class Plugin {
 		( new Pairing\AjaxHandler() )->register_hooks();
 		( new Admin\ScannerUsersPage() )->register_hooks();
 		( new Admin\UserProfile() )->register_hooks();
+		( new Admin\EventMetaBox() )->register_hooks();
 
 		Assignments::register_hooks();
 		Organizers::register_hooks();

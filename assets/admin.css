@@ -82,3 +82,29 @@
 	border-left: 3px solid #dcdcde;
 	padding-left: 8px;
 }
+
+/* Event edit screen: Ticket Scanners meta box */
+.tec-scanner-candidates {
+	margin: 0 0 8px;
+	max-height: 260px;
+	overflow-y: auto;
+}
+
+.tec-scanner-candidates li {
+	margin: 0 0 8px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.tec-scanner-candidates li:last-child {
+	border-bottom: 0;
+}
+
+.tec-scanner-candidates .description {
+	margin-left: 24px;
+	font-style: italic;
+}
+
+.tec-scanner-grant-note {
+	color: #996800;
+}

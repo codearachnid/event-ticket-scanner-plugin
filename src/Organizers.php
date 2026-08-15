@@ -42,6 +42,8 @@ final class Organizers {
 	}
 
 	public static function set_linked_user( int $organizer_id, int $user_id ): void {
+		$previous = self::linked_user_id( $organizer_id );
+
 		if ( $user_id > 0 ) {
 			update_post_meta( $organizer_id, self::META_USER, $user_id );
 		} else {
@@ -49,6 +51,13 @@ final class Organizers {
 		}
 
 		self::flush_cache();
+
+		// The link is scope, and scope implies the check-in capability — grant
+		// it to the new user, and withdraw it from the old one if this was the
+		// last thing keeping it.
+		foreach ( array_unique( array_filter( [ $user_id, $previous ] ) ) as $affected ) {
+			Assignments::refresh_checkin_cap( (int) $affected );
+		}
 	}
 
 	/**
@@ -75,6 +84,31 @@ final class Organizers {
 				]
 			)
 		);
+	}
+
+	/**
+	 * Every user linked to any organizer.
+	 *
+	 * @return int[]
+	 */
+	public static function all_linked_user_ids(): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT pm.meta_value
+				 FROM {$wpdb->postmeta} pm
+				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				 WHERE pm.meta_key = %s
+				   AND p.post_type = %s
+				 LIMIT 500",
+				self::META_USER,
+				self::POST_TYPE
+			)
+		);
+
+		return array_values( array_filter( array_map( 'intval', $ids ) ) );
 	}
 
 	/**

@@ -25,30 +25,34 @@ final class ScannerUsersPage {
 
 	private string $hook_suffix = '';
 
+	/** Whichever parent menu accepted the page — the page URL depends on it. */
+	private static string $parent = 'admin.php';
+
 	public function register_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ], 31 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue' ] );
 	}
 
 	public function register_menu(): void {
-		$hook = add_submenu_page(
-			'tec-tickets',
-			__( 'Scanner Users', 'wp-tec-ticket-scanner' ),
-			__( 'Scanner Users', 'wp-tec-ticket-scanner' ),
-			Plugin::CAP_MANAGE,
-			self::SLUG,
-			[ $this, 'render' ]
-		);
+		// Sits beside Organizers and Venues in the Events menu — scanners are
+		// another thing you relate to an event, so they belong in the same list.
+		$parents = [ 'edit.php?post_type=' . EventMetaBox::POST_TYPE, 'tec-tickets', 'users.php' ];
+		$hook    = false;
 
-		if ( ! $hook ) {
+		foreach ( $parents as $parent ) {
 			$hook = add_submenu_page(
-				'users.php',
-				__( 'Scanner Users', 'wp-tec-ticket-scanner' ),
-				__( 'Scanner Users', 'wp-tec-ticket-scanner' ),
+				$parent,
+				__( 'Scanners', 'wp-tec-ticket-scanner' ),
+				__( 'Scanners', 'wp-tec-ticket-scanner' ),
 				Plugin::CAP_MANAGE,
 				self::SLUG,
 				[ $this, 'render' ]
 			);
+
+			if ( $hook ) {
+				self::$parent = $parent;
+				break;
+			}
 		}
 
 		$this->hook_suffix = (string) $hook;
@@ -162,9 +166,16 @@ final class ScannerUsersPage {
 		$this->redirect( [ 'assigned' => $user_id ] );
 	}
 
+	/** Admin URL of this page, under whichever menu accepted it. */
+	public static function page_url(): string {
+		$separator = str_contains( self::$parent, '?' ) ? '&' : '?';
+
+		return admin_url( self::$parent . $separator . 'page=' . self::SLUG );
+	}
+
 	/** @param array<string,int|string> $args */
 	private function redirect( array $args ): void {
-		wp_safe_redirect( add_query_arg( $args, admin_url( 'admin.php?page=' . self::SLUG ) ) );
+		wp_safe_redirect( add_query_arg( $args, self::page_url() ) );
 		exit;
 	}
 
@@ -181,7 +192,7 @@ final class ScannerUsersPage {
 		$events = Assignments::assignable_events( $assigned_everywhere );
 		?>
 		<div class="wrap tec-scanner-admin">
-			<h1><?php esc_html_e( 'Scanner Users', 'wp-tec-ticket-scanner' ); ?></h1>
+			<h1><?php esc_html_e( 'Scanners', 'wp-tec-ticket-scanner' ); ?></h1>
 			<p class="description">
 				<?php esc_html_e( 'Scanner accounts can only check attendees in — and only for the events assigned to them. Everything else on the site stays invisible to them, in the app and in the API.', 'wp-tec-ticket-scanner' ); ?>
 			</p>
@@ -194,7 +205,7 @@ final class ScannerUsersPage {
 				</p></div>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Add a scanner user', 'wp-tec-ticket-scanner' ); ?></h2>
+			<h2><?php esc_html_e( 'Add a scanner', 'wp-tec-ticket-scanner' ); ?></h2>
 			<form method="post" class="card tec-scanner-create">
 				<?php wp_nonce_field( self::NONCE_CREATE ); ?>
 				<input type="hidden" name="tec_scanner_action" value="create_user">
@@ -227,7 +238,7 @@ final class ScannerUsersPage {
 				</p>
 			</form>
 
-			<h2><?php esc_html_e( 'Existing scanner accounts', 'wp-tec-ticket-scanner' ); ?></h2>
+			<h2><?php esc_html_e( 'Existing scanners', 'wp-tec-ticket-scanner' ); ?></h2>
 
 			<?php if ( ! $users ) : ?>
 				<p><?php esc_html_e( 'No users can check attendees in yet.', 'wp-tec-ticket-scanner' ); ?></p>
