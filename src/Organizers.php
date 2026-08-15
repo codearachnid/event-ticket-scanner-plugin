@@ -22,8 +22,10 @@ final class Organizers {
 
 	public const POST_TYPE = 'tribe_organizer';
 
-	/** Per-request memo — for_user() runs on every REST call. */
+	/** Per-request memos — these run per candidate on the event screen. */
 	private static array $event_cache = [];
+
+	private static array $organizer_cache = [];
 
 	public static function register_hooks(): void {
 		add_action( 'add_meta_boxes', [ self::class, 'add_meta_box' ] );
@@ -32,7 +34,8 @@ final class Organizers {
 	}
 
 	public static function flush_cache(): void {
-		self::$event_cache = [];
+		self::$event_cache     = [];
+		self::$organizer_cache = [];
 	}
 
 	/* --------------------------------------------------------------- reads */
@@ -70,7 +73,11 @@ final class Organizers {
 			return [];
 		}
 
-		return array_map(
+		if ( isset( self::$organizer_cache[ $user_id ] ) ) {
+			return self::$organizer_cache[ $user_id ];
+		}
+
+		return self::$organizer_cache[ $user_id ] = array_map(
 			'intval',
 			get_posts(
 				[

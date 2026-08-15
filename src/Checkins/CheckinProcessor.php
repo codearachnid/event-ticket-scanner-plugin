@@ -76,15 +76,28 @@ final class CheckinProcessor {
 
 		$event_id = (int) get_post_meta( $attendee_id, $config['event'], true );
 
-		// Assignment gate: a restricted operator may only touch attendees of
-		// the events they are assigned to. Kept out of the idempotency ledger
-		// so the op still applies if the assignment is granted afterwards.
-		if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
-			$result = $this->result( $op_id, 'not_authorized', 'You are not assigned to scan this event.', $attendee_id );
+		// Assignment gate, for restricted operators only: they may touch just the
+		// attendees of events in their scope. Denials stay out of the idempotency
+		// ledger so the op still applies if the assignment is granted afterwards.
+		if ( ! Assignments::is_unrestricted() ) {
+			if ( ! $event_id ) {
+				// Attendee has no event to check scope against. That is a data
+				// fault, not a permission one — say so, and keep it retryable.
+				return $this->result(
+					$op_id,
+					'error',
+					'This attendee is not linked to an event, so scanning permission cannot be verified.',
+					$attendee_id
+				);
+			}
 
-			$result['_no_store'] = true;
+			if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
+				$result = $this->result( $op_id, 'not_authorized', 'You are not assigned to scan this event.', $attendee_id );
 
-			return $result;
+				$result['_no_store'] = true;
+
+				return $result;
+			}
 		}
 
 		$checked_in = (bool) get_post_meta( $attendee_id, $config['checkin'], true );

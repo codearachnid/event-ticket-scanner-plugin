@@ -50,11 +50,12 @@ final class ScannerCandidates {
 				continue;
 			}
 
-			$reasons      = [];
-			$unrestricted = Assignments::is_unrestricted( (int) $user_id );
-			$can_checkin  = user_can( $user, Plugin::CAP_CHECKIN );
-			$can_edit     = user_can( $user, 'edit_post', $event_id );
-			$derived      = (bool) array_intersect( $organizer_ids, Organizers::organizer_ids_for_user( (int) $user_id ) );
+			$reasons       = [];
+			$unrestricted  = Assignments::is_unrestricted( (int) $user_id );
+			$can_checkin   = user_can( $user, Plugin::CAP_CHECKIN );
+			$can_edit      = user_can( $user, 'edit_post', $event_id );
+			$user_orgs     = Organizers::organizer_ids_for_user( (int) $user_id );
+			$derived       = (bool) array_intersect( $organizer_ids, $user_orgs );
 
 			if ( in_array( Plugin::ROLE_SCANNER, (array) $user->roles, true ) ) {
 				$reasons[] = __( 'Event Scanner', 'event-ticket-scanner' );
@@ -66,7 +67,7 @@ final class ScannerCandidates {
 
 			if ( $derived ) {
 				$reasons[] = __( "this event's organizer", 'event-ticket-scanner' );
-			} elseif ( Organizers::organizer_ids_for_user( (int) $user_id ) ) {
+			} elseif ( $user_orgs ) {
 				$reasons[] = __( 'linked organizer', 'event-ticket-scanner' );
 			}
 

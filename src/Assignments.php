@@ -294,12 +294,18 @@ final class Assignments {
 		}
 	}
 
+	/**
+	 * Both of these operate on DIRECT assignments only. Passing the merged
+	 * scope would persist organizer-derived events as direct rows, so unlinking
+	 * the organizer later would leave the access behind — the derived half of
+	 * the scope has to stay derived.
+	 */
 	public static function assign( int $user_id, int $event_id ): void {
-		self::set_for_user( $user_id, array_merge( self::for_user( $user_id ), [ $event_id ] ) );
+		self::set_for_user( $user_id, array_merge( self::direct_for_user( $user_id ), [ $event_id ] ) );
 	}
 
 	public static function unassign( int $user_id, int $event_id ): void {
-		self::set_for_user( $user_id, array_diff( self::for_user( $user_id ), [ $event_id ] ) );
+		self::set_for_user( $user_id, array_diff( self::direct_for_user( $user_id ), [ $event_id ] ) );
 	}
 
 	/** Drop every assignment to an event that is being deleted. */
