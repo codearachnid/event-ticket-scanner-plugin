@@ -67,7 +67,7 @@ A restricted account with no assignments sees nothing: an empty event list, `403
 
 ## REST API
 
-Namespace `tec-scanner/v1`. Authentication is a WordPress Application Password over HTTPS.
+Namespace `event-ticket-scanner/v1`. Authentication is a WordPress Application Password over HTTPS.
 
 | Endpoint | Purpose |
 |---|---|

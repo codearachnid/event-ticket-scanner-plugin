@@ -1,18 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Rest;
+namespace EventTicketScanner\Rest;
 
-use TEC_Scanner\Attendees\AttendeeMapper;
-use TEC_Scanner\Checkins\CheckinProcessor;
-use TEC_Scanner\Pairing\PairingService;
-use TEC_Scanner\Plugin;
-use TEC_Scanner\TouchIndex;
+use EventTicketScanner\Attendees\AttendeeMapper;
+use EventTicketScanner\Checkins\CheckinProcessor;
+use EventTicketScanner\Pairing\PairingService;
+use EventTicketScanner\Plugin;
+use EventTicketScanner\TouchIndex;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST surface, namespace tec-scanner/v1. The contract lives in the mobile
+ * REST surface, namespace event-ticket-scanner/v1. The contract lives in the mobile
  * repo's docs/api/openapi.yaml — response shapes here must match it exactly.
  */
 final class Routes {

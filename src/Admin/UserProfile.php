@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Admin;
+namespace EventTicketScanner\Admin;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Organizers;
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Organizers;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class UserProfile {
 
-	private const NONCE = 'tec_scanner_user_events';
+	private const NONCE = 'event_ticket_scanner_user_events';
 
 	public function register_hooks(): void {
 		add_action( 'show_user_profile', [ $this, 'render' ] );
@@ -46,7 +46,7 @@ final class UserProfile {
 		$events  = Assignments::assignable_events( $direct );
 		$derived = array_diff( Organizers::event_ids_for_user( $user_id ), $direct );
 
-		wp_nonce_field( self::NONCE, 'tec_scanner_user_events_nonce' );
+		wp_nonce_field( self::NONCE, 'event_ticket_scanner_user_events_nonce' );
 		?>
 		<table class="form-table" role="presentation">
 			<tr>
@@ -55,11 +55,11 @@ final class UserProfile {
 					<?php if ( ! $events ) : ?>
 						<p class="description"><?php esc_html_e( 'No events available to assign.', 'event-ticket-scanner' ); ?></p>
 					<?php else : ?>
-						<fieldset class="tec-scanner-event-list">
+						<fieldset class="event-ticket-scanner-event-list">
 							<?php foreach ( $events as $event ) : ?>
 								<?php $event_id = (int) $event->ID; ?>
 								<label>
-									<input type="checkbox" name="tec_scanner_events[]" value="<?php echo esc_attr( (string) $event_id ); ?>" <?php checked( in_array( $event_id, $direct, true ) ); ?>>
+									<input type="checkbox" name="event_ticket_scanner_events[]" value="<?php echo esc_attr( (string) $event_id ); ?>" <?php checked( in_array( $event_id, $direct, true ) ); ?>>
 									<?php echo esc_html( html_entity_decode( get_the_title( $event ), ENT_QUOTES ) ); ?>
 								</label><br>
 							<?php endforeach; ?>
@@ -91,11 +91,11 @@ final class UserProfile {
 			return;
 		}
 
-		if ( ! isset( $_POST['tec_scanner_user_events_nonce'] )
-			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['tec_scanner_user_events_nonce'] ) ), self::NONCE ) ) {
+		if ( ! isset( $_POST['event_ticket_scanner_user_events_nonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['event_ticket_scanner_user_events_nonce'] ) ), self::NONCE ) ) {
 			return;
 		}
 
-		Assignments::set_for_user( $user_id, array_map( 'absint', (array) ( $_POST['tec_scanner_events'] ?? [] ) ) );
+		Assignments::set_for_user( $user_id, array_map( 'absint', (array) ( $_POST['event_ticket_scanner_events'] ?? [] ) ) );
 	}
 }

@@ -102,7 +102,7 @@ Yes. Scanner assignments are not tied to dates, so access to an event survives t
 
 = Is there a REST API I can build against? =
 
-Yes, under the `tec-scanner/v1` namespace: `/me`, `/events`, `/events/{id}/attendees` with delta sync, `/events/{id}/stats`, `/checkins`, and `/pair`. It is documented as an OpenAPI contract.
+Yes, under the `event-ticket-scanner/v1` namespace: `/me`, `/events`, `/events/{id}/attendees` with delta sync, `/events/{id}/stats`, `/checkins`, and `/pair`. It is documented as an OpenAPI contract.
 
 == Screenshots ==
 
@@ -124,7 +124,7 @@ This plugin does not connect to any external service. All communication happens 
 * New: Ticket Scanners meta box on the event edit screen for assigning door staff per event.
 * New: link an Organizer to a user account to grant scanning access across that organizer's whole calendar.
 * New: `wp event-ticket-scanner` WP-CLI commands for creating, assigning, and listing scanners.
-* Changed: the scanner role is now `event_ticket_scanner` and its capabilities are `event_ticket_scanner_*`, matching the plugin slug. Existing accounts are migrated automatically on upgrade.
+* Changed: everything is namespaced to the plugin slug — the REST namespace is now `event-ticket-scanner/v1`, the role is `event_ticket_scanner`, and capabilities, filters, options, and tables use the `event_ticket_scanner_` prefix.
 * Improved: `/me` now reports the caller's event scope so the app can hide what it cannot load.
 
 = 1.0.0 =

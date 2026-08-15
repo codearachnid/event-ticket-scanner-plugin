@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Pairing;
+namespace EventTicketScanner\Pairing;
 
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,9 +22,9 @@ final class PairingService {
 
 	public const TOKEN_TTL = 5 * MINUTE_IN_SECONDS;
 
-	private const TRANSIENT_PREFIX = 'tec_scanner_pair_';
+	private const TRANSIENT_PREFIX = 'event_ticket_scanner_pair_';
 
-	private const RATE_PREFIX = 'tec_scanner_pair_rate_';
+	private const RATE_PREFIX = 'event_ticket_scanner_pair_rate_';
 
 	private const RATE_MAX_ATTEMPTS = 10;
 
@@ -48,7 +48,7 @@ final class PairingService {
 
 		return [
 			'v'          => 1,
-			'type'       => 'tec-scanner-pair',
+			'type'       => 'event-ticket-scanner-pair',
 			'url'        => untrailingslashit( home_url() ),
 			'user'       => $user ? $user->user_login : '',
 			'token'      => $token,
@@ -63,7 +63,7 @@ final class PairingService {
 	 */
 	public function consume_token( string $token, string $device_name, string $client_ip ) {
 		if ( $this->rate_limited( $client_ip ) ) {
-			return new \WP_Error( 'tec_scanner_rate_limited', __( 'Too many pairing attempts. Try again in a few minutes.', 'event-ticket-scanner' ), [ 'status' => 429 ] );
+			return new \WP_Error( 'event_ticket_scanner_rate_limited', __( 'Too many pairing attempts. Try again in a few minutes.', 'event-ticket-scanner' ), [ 'status' => 429 ] );
 		}
 
 		$this->count_attempt( $client_ip );
@@ -72,7 +72,7 @@ final class PairingService {
 		$record = get_transient( $key );
 
 		if ( ! is_array( $record ) || empty( $record['user_id'] ) ) {
-			return new \WP_Error( 'tec_scanner_invalid_token', __( 'This pairing code is invalid or has expired. Generate a fresh one in wp-admin.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
+			return new \WP_Error( 'event_ticket_scanner_invalid_token', __( 'This pairing code is invalid or has expired. Generate a fresh one in wp-admin.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
 		}
 
 		// Single use — consume before minting anything.
@@ -81,11 +81,11 @@ final class PairingService {
 		$user = get_userdata( (int) $record['user_id'] );
 
 		if ( ! $user || ! user_can( $user, Plugin::CAP_CHECKIN ) ) {
-			return new \WP_Error( 'tec_scanner_user_invalid', __( 'The pairing user no longer exists or lost check-in permission.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
+			return new \WP_Error( 'event_ticket_scanner_user_invalid', __( 'The pairing user no longer exists or lost check-in permission.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
 		}
 
 		if ( ! wp_is_application_passwords_available_for_user( $user ) ) {
-			return new \WP_Error( 'tec_scanner_app_passwords_unavailable', __( 'Application passwords are not available for this user on this site.', 'event-ticket-scanner' ), [ 'status' => 501 ] );
+			return new \WP_Error( 'event_ticket_scanner_app_passwords_unavailable', __( 'Application passwords are not available for this user on this site.', 'event-ticket-scanner' ), [ 'status' => 501 ] );
 		}
 
 		$device_name = sanitize_text_field( $device_name ) ?: __( 'Scanner device', 'event-ticket-scanner' );
@@ -102,7 +102,7 @@ final class PairingService {
 		);
 
 		if ( is_wp_error( $created ) ) {
-			return new \WP_Error( 'tec_scanner_password_failed', $created->get_error_message(), [ 'status' => 500 ] );
+			return new \WP_Error( 'event_ticket_scanner_password_failed', $created->get_error_message(), [ 'status' => 500 ] );
 		}
 
 		[ $plaintext_password ] = $created;

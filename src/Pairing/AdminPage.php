@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Pairing;
+namespace EventTicketScanner\Pairing;
 
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class AdminPage {
 
-	public const SLUG = 'tec-scanner-app';
+	public const SLUG = 'event-ticket-scanner-app';
 
 	private string $hook_suffix = '';
 
@@ -52,13 +52,13 @@ final class AdminPage {
 			return;
 		}
 
-		wp_enqueue_script( 'tec-scanner-qrcode', TEC_SCANNER_URL . 'assets/qrcode.min.js', [], TEC_SCANNER_VERSION, true );
-		wp_enqueue_script( 'tec-scanner-admin', TEC_SCANNER_URL . 'assets/admin.js', [ 'tec-scanner-qrcode' ], TEC_SCANNER_VERSION, true );
-		wp_enqueue_style( 'tec-scanner-admin', TEC_SCANNER_URL . 'assets/admin.css', [], TEC_SCANNER_VERSION );
+		wp_enqueue_script( 'event-ticket-scanner-qrcode', EVENT_TICKET_SCANNER_URL . 'assets/qrcode.min.js', [], EVENT_TICKET_SCANNER_VERSION, true );
+		wp_enqueue_script( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.js', [ 'event-ticket-scanner-qrcode' ], EVENT_TICKET_SCANNER_VERSION, true );
+		wp_enqueue_style( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.css', [], EVENT_TICKET_SCANNER_VERSION );
 
 		wp_localize_script(
-			'tec-scanner-admin',
-			'tecScannerAdmin',
+			'event-ticket-scanner-admin',
+			'eventTicketScannerAdmin',
 			[
 				'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
 				'action'   => AjaxHandler::ACTION,
@@ -76,11 +76,11 @@ final class AdminPage {
 	public function render(): void {
 		$secure = Plugin::transport_is_secure();
 		?>
-		<div class="wrap tec-scanner-admin">
+		<div class="wrap event-ticket-scanner-admin">
 			<h1><?php esc_html_e( 'Event Ticket Scanner', 'event-ticket-scanner' ); ?></h1>
 
-			<div class="tec-scanner-columns">
-				<div class="card tec-scanner-pair-card">
+			<div class="event-ticket-scanner-columns">
+				<div class="card event-ticket-scanner-pair-card">
 					<h2><?php esc_html_e( 'Pair a scanning device', 'event-ticket-scanner' ); ?></h2>
 					<p>
 						<?php esc_html_e( 'Open the TEC Ticket Scanner app on the phone, choose "Scan pairing code", and point it at the QR code below. The device receives its own application password tied to your account — revoke it any time from your profile.', 'event-ticket-scanner' ); ?>
@@ -91,12 +91,12 @@ final class AdminPage {
 							<?php esc_html_e( 'This site is not served over HTTPS, so pairing and API access are disabled. Enable HTTPS (or the local-development filter) first.', 'event-ticket-scanner' ); ?>
 						</p></div>
 					<?php else : ?>
-						<div class="tec-scanner-qr-wrap">
-							<div id="tec-scanner-qr" class="tec-scanner-qr" aria-label="<?php esc_attr_e( 'Pairing QR code', 'event-ticket-scanner' ); ?>"></div>
-							<p class="description" data-status-for="tec-scanner-qr"></p>
+						<div class="event-ticket-scanner-qr-wrap">
+							<div id="event-ticket-scanner-qr" class="event-ticket-scanner-qr" aria-label="<?php esc_attr_e( 'Pairing QR code', 'event-ticket-scanner' ); ?>"></div>
+							<p class="description" data-status-for="event-ticket-scanner-qr"></p>
 						</div>
 						<p>
-							<button type="button" class="button button-primary" data-tec-scanner-pair data-target="tec-scanner-qr">
+							<button type="button" class="button button-primary" data-event-ticket-scanner-pair data-target="event-ticket-scanner-qr">
 								<?php esc_html_e( 'Generate pairing code', 'event-ticket-scanner' ); ?>
 							</button>
 						</p>
@@ -123,7 +123,7 @@ final class AdminPage {
 					</ol>
 
 					<h2><?php esc_html_e( 'Status', 'event-ticket-scanner' ); ?></h2>
-					<table class="widefat striped tec-scanner-status">
+					<table class="widefat striped event-ticket-scanner-status">
 						<tbody>
 							<tr>
 								<td><?php esc_html_e( 'REST endpoint', 'event-ticket-scanner' ); ?></td>

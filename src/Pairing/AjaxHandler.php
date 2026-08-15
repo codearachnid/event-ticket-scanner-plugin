@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Pairing;
+namespace EventTicketScanner\Pairing;
 
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
 /** Authenticated admin-ajax endpoint that mints pairing tokens for the QR. */
 final class AjaxHandler {
 
-	public const ACTION = 'tec_scanner_generate_pair_token';
+	public const ACTION = 'event_ticket_scanner_generate_pair_token';
 
 	public function register_hooks(): void {
 		add_action( 'wp_ajax_' . self::ACTION, [ $this, 'handle' ] );

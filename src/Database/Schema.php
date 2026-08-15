@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Database;
+namespace EventTicketScanner\Database;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -10,13 +10,13 @@ final class Schema {
 	public static function touch_table(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'tec_scanner_touch';
+		return $wpdb->prefix . 'event_ticket_scanner_touch';
 	}
 
 	public static function ops_table(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'tec_scanner_ops';
+		return $wpdb->prefix . 'event_ticket_scanner_ops';
 	}
 
 	public static function create_tables(): void {

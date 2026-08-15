@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner;
+namespace EventTicketScanner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,26 +18,12 @@ final class Plugin {
 	/** Create scanner users, assign them to events, pair their devices. */
 	public const CAP_MANAGE = 'event_ticket_scanner_manage_scanners';
 
-	/**
-	 * Pre-1.1 capability slugs, mapped onto the current ones on upgrade.
-	 * Capabilities live in the roles option and in per-user meta, so a rename
-	 * without this would revoke access from everyone holding them.
-	 *
-	 * @var array<string,string> Old slug => current slug.
-	 */
-	public const LEGACY_CAPS = [
-		'tec_scanner_checkin'          => self::CAP_CHECKIN,
-		'tec_scanner_scan_all_events'  => self::CAP_SCAN_ALL,
-		'tec_scanner_manage_scanners'  => self::CAP_MANAGE,
-	];
 
 	/** Purpose-built role: check-in only, restricted to assigned events. */
 	public const ROLE_SCANNER = 'event_ticket_scanner';
 
-	/** Pre-1.1 role slug, migrated to ROLE_SCANNER on upgrade. */
-	public const ROLE_SCANNER_LEGACY = 'tec_scanner';
 
-	public const REST_NAMESPACE = 'tec-scanner/v1';
+	public const REST_NAMESPACE = 'event-ticket-scanner/v1';
 
 	private static ?Plugin $instance = null;
 
@@ -79,7 +65,7 @@ final class Plugin {
 	public static function dependencies_met(): bool {
 		return class_exists( 'Tribe__Tickets__Main' )
 			&& defined( 'Tribe__Tickets__Main::VERSION' )
-			&& version_compare( \Tribe__Tickets__Main::VERSION, TEC_SCANNER_MIN_ET_VERSION, '>=' );
+			&& version_compare( \Tribe__Tickets__Main::VERSION, EVENT_TICKET_SCANNER_MIN_ET_VERSION, '>=' );
 	}
 
 	public static function render_dependency_notice(): void {
@@ -89,7 +75,7 @@ final class Plugin {
 				sprintf(
 					/* translators: %s: minimum Event Tickets version. */
 					__( 'TEC Ticket Scanner Companion requires the Event Tickets plugin (version %s or newer) to be installed and active.', 'event-ticket-scanner' ),
-					TEC_SCANNER_MIN_ET_VERSION
+					EVENT_TICKET_SCANNER_MIN_ET_VERSION
 				)
 			)
 		);

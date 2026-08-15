@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner;
+namespace EventTicketScanner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 final class Organizers {
 
 	/** Post meta on tribe_organizer holding the linked user ID. */
-	public const META_USER = '_tec_scanner_user_id';
+	public const META_USER = '_event_ticket_scanner_user_id';
 
 	public const POST_TYPE = 'tribe_organizer';
 
@@ -182,7 +182,7 @@ final class Organizers {
 		}
 
 		add_meta_box(
-			'tec-scanner-organizer-user',
+			'event-ticket-scanner-organizer-user',
 			__( 'Scanner access', 'event-ticket-scanner' ),
 			[ self::class, 'render_meta_box' ],
 			self::POST_TYPE,
@@ -194,13 +194,13 @@ final class Organizers {
 		$linked = self::linked_user_id( (int) $post->ID );
 		$events = $linked ? self::event_ids_for_user( $linked ) : [];
 
-		wp_nonce_field( 'tec_scanner_organizer_user', 'tec_scanner_organizer_nonce' );
+		wp_nonce_field( 'event_ticket_scanner_organizer_user', 'event_ticket_scanner_organizer_nonce' );
 
 		echo '<p>' . esc_html__( 'Link this organizer to a user account. That user can scan every event listing this organizer, on top of any events assigned to them directly.', 'event-ticket-scanner' ) . '</p>';
 
 		wp_dropdown_users(
 			[
-				'name'              => 'tec_scanner_organizer_user',
+				'name'              => 'event_ticket_scanner_organizer_user',
 				'selected'          => $linked,
 				'include_selected'  => true,
 				'show_option_none'  => __( '— No linked user —', 'event-ticket-scanner' ),
@@ -210,7 +210,7 @@ final class Organizers {
 		);
 
 		if ( $linked && ! user_can( $linked, Plugin::CAP_CHECKIN ) ) {
-			echo '<p class="description tec-scanner-warning">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role under Events → Scanners.', 'event-ticket-scanner' ) . '</p>';
+			echo '<p class="description event-ticket-scanner-warning">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role under Events → Scanners.', 'event-ticket-scanner' ) . '</p>';
 		} elseif ( $linked ) {
 			printf(
 				'<p class="description">%s</p>',
@@ -230,8 +230,8 @@ final class Organizers {
 			return;
 		}
 
-		if ( ! isset( $_POST['tec_scanner_organizer_nonce'] )
-			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['tec_scanner_organizer_nonce'] ) ), 'tec_scanner_organizer_user' ) ) {
+		if ( ! isset( $_POST['event_ticket_scanner_organizer_nonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['event_ticket_scanner_organizer_nonce'] ) ), 'event_ticket_scanner_organizer_user' ) ) {
 			return;
 		}
 
@@ -239,6 +239,6 @@ final class Organizers {
 			return;
 		}
 
-		self::set_linked_user( $post_id, absint( wp_unslash( $_POST['tec_scanner_organizer_user'] ?? 0 ) ) );
+		self::set_linked_user( $post_id, absint( wp_unslash( $_POST['event_ticket_scanner_organizer_user'] ?? 0 ) ) );
 	}
 }

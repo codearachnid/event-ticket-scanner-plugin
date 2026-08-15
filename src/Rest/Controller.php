@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Rest;
+namespace EventTicketScanner\Rest;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Attendees\AttendeeMapper;
-use TEC_Scanner\Attendees\Providers;
-use TEC_Scanner\Checkins\CheckinProcessor;
-use TEC_Scanner\Pairing\PairingService;
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Attendees\AttendeeMapper;
+use EventTicketScanner\Attendees\Providers;
+use EventTicketScanner\Checkins\CheckinProcessor;
+use EventTicketScanner\Pairing\PairingService;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -27,7 +27,7 @@ final class Controller {
 	public function can_checkin(): bool|\WP_Error {
 		if ( ! Plugin::transport_is_secure() ) {
 			return new \WP_Error(
-				'tec_scanner_insecure_transport',
+				'event_ticket_scanner_insecure_transport',
 				__( 'The scanner API requires HTTPS.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
@@ -43,7 +43,7 @@ final class Controller {
 
 		if ( ! current_user_can( Plugin::CAP_CHECKIN ) ) {
 			return new \WP_Error(
-				'tec_scanner_forbidden',
+				'event_ticket_scanner_forbidden',
 				__( 'You are not allowed to manage check-ins on this site.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
@@ -73,7 +73,7 @@ final class Controller {
 				],
 				// null = every event; a list = the only events this user may scan.
 				'assigned_event_ids'    => $unrestricted ? null : Assignments::for_user( (int) $user->ID ),
-				'plugin_version'        => TEC_SCANNER_VERSION,
+				'plugin_version'        => EVENT_TICKET_SCANNER_VERSION,
 				'event_tickets_version' => defined( 'Tribe__Tickets__Main::VERSION' ) ? \Tribe__Tickets__Main::VERSION : '',
 				'providers'             => Providers::active_slugs(),
 			]
@@ -280,7 +280,7 @@ final class Controller {
 	public function pair( \WP_REST_Request $request ) {
 		if ( ! Plugin::transport_is_secure() ) {
 			return new \WP_Error(
-				'tec_scanner_insecure_transport',
+				'event_ticket_scanner_insecure_transport',
 				__( 'Pairing requires HTTPS.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
@@ -308,7 +308,7 @@ final class Controller {
 
 		if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
 			return new \WP_Error(
-				'tec_scanner_event_forbidden',
+				'event_ticket_scanner_event_forbidden',
 				__( 'You are not assigned to scan this event.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
@@ -325,7 +325,7 @@ final class Controller {
 
 	private function event_not_found(): \WP_Error {
 		return new \WP_Error(
-			'tec_scanner_event_not_found',
+			'event_ticket_scanner_event_not_found',
 			__( 'Event not found.', 'event-ticket-scanner' ),
 			[ 'status' => 404 ]
 		);
@@ -355,7 +355,7 @@ final class Controller {
 			return [];
 		}
 
-		$touch_times = ( new \TEC_Scanner\TouchIndex() )->times_for( $ids );
+		$touch_times = ( new \EventTicketScanner\TouchIndex() )->times_for( $ids );
 
 		global $wpdb;
 

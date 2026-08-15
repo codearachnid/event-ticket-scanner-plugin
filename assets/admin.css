@@ -1,4 +1,4 @@
-.tec-scanner-columns {
+.event-ticket-scanner-columns {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 16px;
@@ -6,13 +6,13 @@
 	margin-top: 12px;
 }
 
-.tec-scanner-columns .card {
+.event-ticket-scanner-columns .card {
 	flex: 1 1 380px;
 	max-width: 560px;
 	padding: 16px 20px;
 }
 
-.tec-scanner-qr {
+.event-ticket-scanner-qr {
 	width: 280px;
 	height: 280px;
 	margin: 12px 0 4px;
@@ -26,28 +26,28 @@
 	box-sizing: content-box;
 }
 
-.tec-scanner-qr:empty::after {
+.event-ticket-scanner-qr:empty::after {
 	content: '—';
 	color: #a7aaad;
 	font-size: 32px;
 }
 
-.tec-scanner-qr.is-expired {
+.event-ticket-scanner-qr.is-expired {
 	opacity: 0.15;
 }
 
-.tec-scanner-status td:first-child {
+.event-ticket-scanner-status td:first-child {
 	width: 160px;
 	font-weight: 600;
 }
 
 /* Scanner Users screen */
-.tec-scanner-create {
+.event-ticket-scanner-create {
 	padding: 4px 20px 12px;
 	max-width: 780px;
 }
 
-.tec-scanner-event-list {
+.event-ticket-scanner-event-list {
 	max-height: 220px;
 	overflow-y: auto;
 	border: 1px solid #dcdcde;
@@ -56,59 +56,59 @@
 	background: #fff;
 }
 
-.tec-scanner-event-list label {
+.event-ticket-scanner-event-list label {
 	display: block;
 	padding: 2px 0;
 }
 
-.tec-scanner-users td {
+.event-ticket-scanner-users td {
 	vertical-align: top;
 }
 
-.tec-scanner-users .tec-scanner-qr {
+.event-ticket-scanner-users .event-ticket-scanner-qr {
 	width: 180px;
 	height: 180px;
 	margin: 10px 0 4px;
 }
 
-.tec-scanner-users .tec-scanner-qr img,
-.tec-scanner-users .tec-scanner-qr canvas {
+.event-ticket-scanner-users .event-ticket-scanner-qr img,
+.event-ticket-scanner-users .event-ticket-scanner-qr canvas {
 	max-width: 100%;
 	height: auto;
 }
 
-.tec-scanner-derived {
+.event-ticket-scanner-derived {
 	margin-top: 8px;
 	border-left: 3px solid #dcdcde;
 	padding-left: 8px;
 }
 
 /* Event edit screen: Ticket Scanners meta box */
-.tec-scanner-candidates {
+.event-ticket-scanner-candidates {
 	margin: 0 0 8px;
 	max-height: 260px;
 	overflow-y: auto;
 }
 
-.tec-scanner-candidates li {
+.event-ticket-scanner-candidates li {
 	margin: 0 0 8px;
 	padding-bottom: 8px;
 	border-bottom: 1px solid #f0f0f1;
 }
 
-.tec-scanner-candidates li:last-child {
+.event-ticket-scanner-candidates li:last-child {
 	border-bottom: 0;
 }
 
-.tec-scanner-candidates .description {
+.event-ticket-scanner-candidates .description {
 	margin-left: 24px;
 	font-style: italic;
 }
 
-.tec-scanner-grant-note {
+.event-ticket-scanner-grant-note {
 	color: #996800;
 }
 
-.tec-scanner-warning {
+.event-ticket-scanner-warning {
 	color: #b32d2e;
 }

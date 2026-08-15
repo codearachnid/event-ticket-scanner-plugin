@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Checkins;
+namespace EventTicketScanner\Checkins;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Attendees\AttendeeMapper;
-use TEC_Scanner\Attendees\Providers;
-use TEC_Scanner\Database\Schema;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Attendees\AttendeeMapper;
+use EventTicketScanner\Attendees\Providers;
+use EventTicketScanner\Database\Schema;
 
 defined( 'ABSPATH' ) || exit;
 

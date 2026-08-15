@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Cli;
+namespace EventTicketScanner\Cli;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Organizers;
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Organizers;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 

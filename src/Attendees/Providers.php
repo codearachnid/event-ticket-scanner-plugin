@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Attendees;
+namespace EventTicketScanner\Attendees;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -57,7 +57,7 @@ final class Providers {
 		 *
 		 * @param array $map post_type => meta key map.
 		 */
-		return (array) apply_filters( 'tec_scanner_provider_map', $map );
+		return (array) apply_filters( 'event_ticket_scanner_provider_map', $map );
 	}
 
 	/** @return string[] Attendee post types. */

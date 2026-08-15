@@ -12,30 +12,30 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       event-ticket-scanner
  *
- * @package TEC_Scanner
+ * @package EventTicketScanner
  */
 
 declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'TEC_SCANNER_VERSION', '1.1.0' );
-define( 'TEC_SCANNER_FILE', __FILE__ );
-define( 'TEC_SCANNER_DIR', plugin_dir_path( __FILE__ ) );
-define( 'TEC_SCANNER_URL', plugin_dir_url( __FILE__ ) );
+define( 'EVENT_TICKET_SCANNER_VERSION', '1.1.0' );
+define( 'EVENT_TICKET_SCANNER_FILE', __FILE__ );
+define( 'EVENT_TICKET_SCANNER_DIR', plugin_dir_path( __FILE__ ) );
+define( 'EVENT_TICKET_SCANNER_URL', plugin_dir_url( __FILE__ ) );
 
 /** Minimum Event Tickets version — QR + check-in internals we rely on landed in 5.7.0. */
-define( 'TEC_SCANNER_MIN_ET_VERSION', '5.7.0' );
+define( 'EVENT_TICKET_SCANNER_MIN_ET_VERSION', '5.7.0' );
 
-// PSR-4-ish autoloader for the TEC_Scanner\ namespace (no build step needed).
+// PSR-4-ish autoloader for the EventTicketScanner\ namespace (no build step needed).
 spl_autoload_register(
 	static function ( string $class ): void {
-		if ( ! str_starts_with( $class, 'TEC_Scanner\\' ) ) {
+		if ( ! str_starts_with( $class, 'EventTicketScanner\\' ) ) {
 			return;
 		}
 
-		$relative = substr( $class, strlen( 'TEC_Scanner\\' ) );
-		$path     = TEC_SCANNER_DIR . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
+		$relative = substr( $class, strlen( 'EventTicketScanner\\' ) );
+		$path     = EVENT_TICKET_SCANNER_DIR . 'src/' . str_replace( '\\', '/', $relative ) . '.php';
 
 		if ( is_readable( $path ) ) {
 			require $path;
@@ -43,7 +43,7 @@ spl_autoload_register(
 	}
 );
 
-register_activation_hook( __FILE__, [ TEC_Scanner\Activation::class, 'activate' ] );
-register_deactivation_hook( __FILE__, [ TEC_Scanner\Activation::class, 'deactivate' ] );
+register_activation_hook( __FILE__, [ EventTicketScanner\Activation::class, 'activate' ] );
+register_deactivation_hook( __FILE__, [ EventTicketScanner\Activation::class, 'deactivate' ] );
 
-add_action( 'plugins_loaded', [ TEC_Scanner\Plugin::class, 'boot' ], 20 );
+add_action( 'plugins_loaded', [ EventTicketScanner\Plugin::class, 'boot' ], 20 );

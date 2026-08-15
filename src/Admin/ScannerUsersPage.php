@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Admin;
+namespace EventTicketScanner\Admin;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Organizers;
-use TEC_Scanner\Pairing\AjaxHandler;
-use TEC_Scanner\Plugin;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Organizers;
+use EventTicketScanner\Pairing\AjaxHandler;
+use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,11 +17,11 @@ defined( 'ABSPATH' ) || exit;
  */
 final class ScannerUsersPage {
 
-	public const SLUG = 'tec-scanner-users';
+	public const SLUG = 'event-ticket-scanner-users';
 
-	private const NONCE_CREATE = 'tec_scanner_create_user';
+	private const NONCE_CREATE = 'event_ticket_scanner_create_user';
 
-	private const NONCE_ASSIGN = 'tec_scanner_assign_events';
+	private const NONCE_ASSIGN = 'event_ticket_scanner_assign_events';
 
 	private string $hook_suffix = '';
 
@@ -67,13 +67,13 @@ final class ScannerUsersPage {
 			return;
 		}
 
-		wp_enqueue_script( 'tec-scanner-qrcode', TEC_SCANNER_URL . 'assets/qrcode.min.js', [], TEC_SCANNER_VERSION, true );
-		wp_enqueue_script( 'tec-scanner-admin', TEC_SCANNER_URL . 'assets/admin.js', [ 'tec-scanner-qrcode' ], TEC_SCANNER_VERSION, true );
-		wp_enqueue_style( 'tec-scanner-admin', TEC_SCANNER_URL . 'assets/admin.css', [], TEC_SCANNER_VERSION );
+		wp_enqueue_script( 'event-ticket-scanner-qrcode', EVENT_TICKET_SCANNER_URL . 'assets/qrcode.min.js', [], EVENT_TICKET_SCANNER_VERSION, true );
+		wp_enqueue_script( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.js', [ 'event-ticket-scanner-qrcode' ], EVENT_TICKET_SCANNER_VERSION, true );
+		wp_enqueue_style( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.css', [], EVENT_TICKET_SCANNER_VERSION );
 
 		wp_localize_script(
-			'tec-scanner-admin',
-			'tecScannerAdmin',
+			'event-ticket-scanner-admin',
+			'eventTicketScannerAdmin',
 			[
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'action'  => AjaxHandler::ACTION,
@@ -96,7 +96,7 @@ final class ScannerUsersPage {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- each branch verifies its own nonce.
-		$action = isset( $_POST['tec_scanner_action'] ) ? sanitize_key( wp_unslash( $_POST['tec_scanner_action'] ) ) : '';
+		$action = isset( $_POST['event_ticket_scanner_action'] ) ? sanitize_key( wp_unslash( $_POST['event_ticket_scanner_action'] ) ) : '';
 
 		if ( 'create_user' === $action ) {
 			check_admin_referer( self::NONCE_CREATE );
@@ -192,7 +192,7 @@ final class ScannerUsersPage {
 
 		$events = Assignments::assignable_events( $assigned_everywhere );
 		?>
-		<div class="wrap tec-scanner-admin">
+		<div class="wrap event-ticket-scanner-admin">
 			<h1><?php esc_html_e( 'Scanners', 'event-ticket-scanner' ); ?></h1>
 			<p class="description">
 				<?php esc_html_e( 'Scanner accounts can only check attendees in — and only for the events assigned to them. Everything else on the site stays invisible to them, in the app and in the API.', 'event-ticket-scanner' ); ?>
@@ -207,9 +207,9 @@ final class ScannerUsersPage {
 			<?php endif; ?>
 
 			<h2><?php esc_html_e( 'Add a scanner', 'event-ticket-scanner' ); ?></h2>
-			<form method="post" class="card tec-scanner-create">
+			<form method="post" class="card event-ticket-scanner-create">
 				<?php wp_nonce_field( self::NONCE_CREATE ); ?>
-				<input type="hidden" name="tec_scanner_action" value="create_user">
+				<input type="hidden" name="event_ticket_scanner_action" value="create_user">
 
 				<table class="form-table" role="presentation">
 					<tr>
@@ -246,7 +246,7 @@ final class ScannerUsersPage {
 				<?php return; ?>
 			<?php endif; ?>
 
-			<table class="widefat striped tec-scanner-users">
+			<table class="widefat striped event-ticket-scanner-users">
 				<thead>
 					<tr>
 						<th><?php esc_html_e( 'User', 'event-ticket-scanner' ); ?></th>
@@ -277,7 +277,7 @@ final class ScannerUsersPage {
 							<?php else : ?>
 								<form method="post">
 									<?php wp_nonce_field( self::NONCE_ASSIGN ); ?>
-									<input type="hidden" name="tec_scanner_action" value="assign_events">
+									<input type="hidden" name="event_ticket_scanner_action" value="assign_events">
 									<input type="hidden" name="scanner_user_id" value="<?php echo esc_attr( (string) $user_id ); ?>">
 									<?php $this->render_event_checkboxes( $events, $current ); ?>
 									<p><button type="submit" class="button"><?php esc_html_e( 'Save assignments', 'event-ticket-scanner' ); ?></button></p>
@@ -289,13 +289,13 @@ final class ScannerUsersPage {
 							<button
 								type="button"
 								class="button"
-								data-tec-scanner-pair
+								data-event-ticket-scanner-pair
 								data-user-id="<?php echo esc_attr( (string) $user_id ); ?>"
-								data-target="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"
+								data-target="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"
 							><?php esc_html_e( 'Pair a device', 'event-ticket-scanner' ); ?></button>
-							<div class="tec-scanner-qr-wrap">
-								<div id="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>" class="tec-scanner-qr"></div>
-								<p class="description" data-status-for="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
+							<div class="event-ticket-scanner-qr-wrap">
+								<div id="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>" class="event-ticket-scanner-qr"></div>
+								<p class="description" data-status-for="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
 							</div>
 						</td>
 					</tr>
@@ -316,7 +316,7 @@ final class ScannerUsersPage {
 			return;
 		}
 
-		echo '<fieldset class="tec-scanner-event-list">';
+		echo '<fieldset class="event-ticket-scanner-event-list">';
 
 		foreach ( $events as $event ) {
 			$event_id = (int) $event->ID;
@@ -358,7 +358,7 @@ final class ScannerUsersPage {
 		}
 
 		printf(
-			'<p class="description tec-scanner-derived">%s<br>%s</p>',
+			'<p class="description event-ticket-scanner-derived">%s<br>%s</p>',
 			wp_kses_post(
 				sprintf(
 					/* translators: %s: organizer links. */

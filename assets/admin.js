@@ -1,8 +1,8 @@
-/* global tecScannerAdmin, QRCode */
+/* global eventTicketScannerAdmin, QRCode */
 ( function () {
 	'use strict';
 
-	var buttons = document.querySelectorAll( '[data-tec-scanner-pair]' );
+	var buttons = document.querySelectorAll( '[data-event-ticket-scanner-pair]' );
 
 	if ( ! buttons.length ) {
 		return;
@@ -36,11 +36,11 @@
 				if ( remaining <= 0 ) {
 					clearInterval( countdown );
 					qrEl.classList.add( 'is-expired' );
-					setStatus( tecScannerAdmin.i18n.expired );
+					setStatus( eventTicketScannerAdmin.i18n.expired );
 					return;
 				}
 
-				setStatus( tecScannerAdmin.i18n.expires.replace( '%s', remaining ) );
+				setStatus( eventTicketScannerAdmin.i18n.expires.replace( '%s', remaining ) );
 			}, 1000 );
 		}
 
@@ -49,8 +49,8 @@
 			setStatus( '…' );
 
 			var body = new URLSearchParams();
-			body.append( 'action', tecScannerAdmin.action );
-			body.append( '_wpnonce', tecScannerAdmin.nonce );
+			body.append( 'action', eventTicketScannerAdmin.action );
+			body.append( '_wpnonce', eventTicketScannerAdmin.nonce );
 
 			var userId = button.getAttribute( 'data-user-id' );
 
@@ -58,7 +58,7 @@
 				body.append( 'user_id', userId );
 			}
 
-			fetch( tecScannerAdmin.ajaxUrl, {
+			fetch( eventTicketScannerAdmin.ajaxUrl, {
 				method: 'POST',
 				credentials: 'same-origin',
 				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -95,7 +95,7 @@
 					startCountdown( data.expires_in );
 				} )
 				.catch( function ( error ) {
-					setStatus( error.message || tecScannerAdmin.i18n.error );
+					setStatus( error.message || eventTicketScannerAdmin.i18n.error );
 				} )
 				.finally( function () {
 					button.disabled = false;

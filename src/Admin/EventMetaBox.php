@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Admin;
+namespace EventTicketScanner\Admin;
 
-use TEC_Scanner\Assignments;
-use TEC_Scanner\Plugin;
-use TEC_Scanner\ScannerCandidates;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Plugin;
+use EventTicketScanner\ScannerCandidates;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,7 +23,7 @@ final class EventMetaBox {
 
 	public const POST_TYPE = 'tribe_events';
 
-	private const NONCE = 'tec_scanner_event_scanners';
+	private const NONCE = 'event_ticket_scanner_event_scanners';
 
 	public function register_hooks(): void {
 		add_action( 'add_meta_boxes', [ $this, 'add_meta_box' ] );
@@ -32,7 +32,7 @@ final class EventMetaBox {
 
 	public function add_meta_box(): void {
 		add_meta_box(
-			'tec-scanner-event-scanners',
+			'event-ticket-scanner-event-scanners',
 			__( 'Ticket Scanners', 'event-ticket-scanner' ),
 			[ $this, 'render' ],
 			self::POST_TYPE,
@@ -56,7 +56,7 @@ final class EventMetaBox {
 			$candidates = array_filter( $candidates, static fn ( array $c ): bool => $c['can_checkin'] );
 		}
 
-		wp_nonce_field( self::NONCE, 'tec_scanner_event_scanners_nonce' );
+		wp_nonce_field( self::NONCE, 'event_ticket_scanner_event_scanners_nonce' );
 
 		echo '<p class="description">' . esc_html__( 'Who can scan tickets at the door for this event.', 'event-ticket-scanner' ) . '</p>';
 
@@ -65,7 +65,7 @@ final class EventMetaBox {
 			return;
 		}
 
-		echo '<ul class="tec-scanner-candidates">';
+		echo '<ul class="event-ticket-scanner-candidates">';
 
 		foreach ( $candidates as $user_id => $candidate ) {
 			$this->render_candidate( (int) $user_id, $candidate, $can_grant );
@@ -95,7 +95,7 @@ final class EventMetaBox {
 		$locked = $candidate['unrestricted'] || $candidate['derived'];
 
 		printf(
-			'<li><label><input type="checkbox" name="tec_scanner_event_scanners[]" value="%1$s"%2$s%3$s> %4$s</label>',
+			'<li><label><input type="checkbox" name="event_ticket_scanner_event_scanners[]" value="%1$s"%2$s%3$s> %4$s</label>',
 			esc_attr( (string) $user_id ),
 			$locked || $candidate['assigned'] ? ' checked' : '',
 			$locked ? ' disabled' : '',
@@ -108,7 +108,7 @@ final class EventMetaBox {
 
 		if ( $can_grant && ! $candidate['can_checkin'] ) {
 			printf(
-				'<br><span class="description tec-scanner-grant-note">%s</span>',
+				'<br><span class="description event-ticket-scanner-grant-note">%s</span>',
 				esc_html__( 'Selecting them grants check-in access to their assigned events.', 'event-ticket-scanner' )
 			);
 		}
@@ -121,8 +121,8 @@ final class EventMetaBox {
 			return;
 		}
 
-		if ( ! isset( $_POST['tec_scanner_event_scanners_nonce'] )
-			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['tec_scanner_event_scanners_nonce'] ) ), self::NONCE ) ) {
+		if ( ! isset( $_POST['event_ticket_scanner_event_scanners_nonce'] )
+			|| ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['event_ticket_scanner_event_scanners_nonce'] ) ), self::NONCE ) ) {
 			return;
 		}
 
@@ -133,7 +133,7 @@ final class EventMetaBox {
 		$can_grant = current_user_can( Plugin::CAP_MANAGE );
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified above.
-		$submitted = array_map( 'absint', (array) ( $_POST['tec_scanner_event_scanners'] ?? [] ) );
+		$submitted = array_map( 'absint', (array) ( $_POST['event_ticket_scanner_event_scanners'] ?? [] ) );
 
 		foreach ( ScannerCandidates::for_event( $post_id ) as $user_id => $candidate ) {
 			$user_id = (int) $user_id;

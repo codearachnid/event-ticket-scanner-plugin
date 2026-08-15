@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner;
+namespace EventTicketScanner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,10 +22,10 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Assignments {
 
-	public const META_KEY = '_tec_scanner_event_id';
+	public const META_KEY = '_event_ticket_scanner_event_id';
 
 	/** Marks a check-in capability this plugin added to the user directly. */
-	public const META_CAP_GRANTED = '_tec_scanner_cap_granted';
+	public const META_CAP_GRANTED = '_event_ticket_scanner_cap_granted';
 
 	public static function register_hooks(): void {
 		// Don't leave assignments pointing at deleted events.

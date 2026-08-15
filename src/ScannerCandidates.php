@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner;
+namespace EventTicketScanner;
 
 defined( 'ABSPATH' ) || exit;
 
