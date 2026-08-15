@@ -1,0 +1,52 @@
+name: Release
+
+# Tag main and this produces the wordpress.org-ready ZIP:
+#   git tag v1.1.0 && git push origin v1.1.0
+#
+# The ZIP is built from .distignore (no hidden files, no bin/, no CLAUDE.md) and
+# Plugin Check runs against that BUILD, not the checkout — which is why the
+# working tree can keep its dev files without ever failing a release.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version to build, e.g. v1.1.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build, check, publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the distributable ZIP
+        id: build
+        run: ./bin/build-zip.sh --verify "${{ steps.version.outputs.tag }}" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Plugin Check (against the built plugin, not the repo)
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ./build/event-ticket-scanner
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            "${{ steps.build.outputs.zip }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --generate-notes

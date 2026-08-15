@@ -1,0 +1,32 @@
+name: CI
+
+# Same checks the release runs, on every push — so a tag is never the first time
+# you find out Plugin Check is unhappy.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  test:
+    name: Lint and Plugin Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Lint every PHP file
+        run: find . -path ./build -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Build the distributable ZIP
+        run: ./bin/build-zip.sh
+
+      - name: Plugin Check (against the built plugin, not the repo)
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ./build/event-ticket-scanner
