@@ -123,7 +123,8 @@ This plugin does not connect to any external service. All communication happens 
 * New: Events → Scanners screen to create scanner accounts, assign events, and pair each person's device.
 * New: Ticket Scanners meta box on the event edit screen for assigning door staff per event.
 * New: link an Organizer to a user account to grant scanning access across that organizer's whole calendar.
-* New: `wp tec-scanner scanner` WP-CLI commands for creating, assigning, and listing scanners.
+* New: `wp event-ticket-scanner` WP-CLI commands for creating, assigning, and listing scanners.
+* Changed: the scanner role is now `event_ticket_scanner` and its capabilities are `event_ticket_scanner_*`, matching the plugin slug. Existing accounts are migrated automatically on upgrade.
 * Improved: `/me` now reports the caller's event scope so the app can hide what it cannot load.
 
 = 1.0.0 =

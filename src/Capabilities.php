@@ -14,11 +14,11 @@ final class Capabilities {
 	 */
 	public static function default_roles(): array {
 		/**
-		 * Filter which roles receive the tec_scanner_checkin capability.
+		 * Filter which roles receive the event_ticket_scanner_checkin capability.
 		 *
 		 * @param string[] $roles Role slugs.
 		 */
-		return (array) apply_filters( 'tec_scanner_checkin_roles', [ 'administrator', 'editor' ] );
+		return (array) apply_filters( 'event_ticket_scanner_checkin_roles', [ 'administrator', 'editor' ] );
 	}
 
 	/**
@@ -32,7 +32,7 @@ final class Capabilities {
 		 *
 		 * @param string[] $roles Role slugs.
 		 */
-		return (array) apply_filters( 'tec_scanner_scan_all_events_roles', [ 'administrator', 'editor' ] );
+		return (array) apply_filters( 'event_ticket_scanner_scan_all_events_roles', [ 'administrator', 'editor' ] );
 	}
 
 	/**
@@ -46,7 +46,7 @@ final class Capabilities {
 		 *
 		 * @param string[] $roles Role slugs.
 		 */
-		return (array) apply_filters( 'tec_scanner_manager_roles', [ 'administrator' ] );
+		return (array) apply_filters( 'event_ticket_scanner_manager_roles', [ 'administrator' ] );
 	}
 
 	/** Capabilities of the dedicated scanner role. */
@@ -59,7 +59,7 @@ final class Capabilities {
 		 * @param array<string,bool> $caps Capability map.
 		 */
 		return (array) apply_filters(
-			'tec_scanner_role_caps',
+			'event_ticket_scanner_role_caps',
 			[
 				'read'             => true,
 				Plugin::CAP_CHECKIN => true,
@@ -69,6 +69,8 @@ final class Capabilities {
 
 	public static function grant(): void {
 		self::register_role();
+		self::migrate_legacy_role();
+		self::migrate_legacy_caps();
 
 		foreach ( self::default_roles() as $role_slug ) {
 			self::add_cap_to_role( $role_slug, Plugin::CAP_CHECKIN );
@@ -110,6 +112,83 @@ final class Capabilities {
 		}
 	}
 
+	/**
+	 * Move anyone still holding the old `tec_scanner` role onto the current one.
+	 *
+	 * The role slug is stored in each user's capabilities meta, so renaming it
+	 * would silently strip check-in access from every scanner account. Runs
+	 * whenever capabilities are (re-)granted and is a no-op once the old role
+	 * is gone.
+	 */
+	public static function migrate_legacy_role(): void {
+		$legacy = get_role( Plugin::ROLE_SCANNER_LEGACY );
+
+		if ( ! $legacy || Plugin::ROLE_SCANNER_LEGACY === Plugin::ROLE_SCANNER ) {
+			return;
+		}
+
+		$user_ids = get_users(
+			[
+				'role'   => Plugin::ROLE_SCANNER_LEGACY,
+				'fields' => 'ID',
+				'number' => 1000,
+			]
+		);
+
+		foreach ( $user_ids as $user_id ) {
+			$user = new \WP_User( (int) $user_id );
+
+			$user->add_role( Plugin::ROLE_SCANNER );
+			$user->remove_role( Plugin::ROLE_SCANNER_LEGACY );
+		}
+
+		remove_role( Plugin::ROLE_SCANNER_LEGACY );
+	}
+
+	/**
+	 * Swap the pre-1.1 `tec_scanner_*` capabilities for their current names,
+	 * on every role that holds them and on every user granted one directly.
+	 */
+	public static function migrate_legacy_caps(): void {
+		foreach ( wp_roles()->roles as $role_slug => $unused ) {
+			$role = get_role( $role_slug );
+
+			if ( ! $role ) {
+				continue;
+			}
+
+			foreach ( Plugin::LEGACY_CAPS as $legacy => $current ) {
+				if ( $legacy === $current || ! $role->has_cap( $legacy ) ) {
+					continue;
+				}
+
+				$role->add_cap( $current );
+				$role->remove_cap( $legacy );
+			}
+		}
+
+		// Users given the check-in capability directly (event authors, organizer
+		// accounts) carry it in their own meta rather than through a role.
+		$granted = get_users(
+			[
+				'meta_key' => Assignments::META_CAP_GRANTED, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'fields'   => 'ID',
+				'number'   => 1000,
+			]
+		);
+
+		foreach ( $granted as $user_id ) {
+			$user = new \WP_User( (int) $user_id );
+
+			foreach ( Plugin::LEGACY_CAPS as $legacy => $current ) {
+				if ( $legacy !== $current && ! empty( $user->caps[ $legacy ] ) ) {
+					$user->add_cap( $current );
+					$user->remove_cap( $legacy );
+				}
+			}
+		}
+	}
+
 	/** Re-assert on init so new roles added via the filters pick the caps up. */
 	public static function ensure_granted(): void {
 		if ( get_option( 'tec_scanner_caps_granted' ) === TEC_SCANNER_VERSION && get_role( Plugin::ROLE_SCANNER ) ) {
@@ -121,7 +200,10 @@ final class Capabilities {
 	}
 
 	public static function revoke_all(): void {
-		$caps = [ Plugin::CAP_CHECKIN, Plugin::CAP_SCAN_ALL, Plugin::CAP_MANAGE ];
+		$caps = array_merge(
+			[ Plugin::CAP_CHECKIN, Plugin::CAP_SCAN_ALL, Plugin::CAP_MANAGE ],
+			array_keys( Plugin::LEGACY_CAPS )
+		);
 
 		foreach ( wp_roles()->roles as $role_slug => $unused ) {
 			$role = get_role( $role_slug );
@@ -138,6 +220,7 @@ final class Capabilities {
 		}
 
 		remove_role( Plugin::ROLE_SCANNER );
+		remove_role( Plugin::ROLE_SCANNER_LEGACY );
 	}
 
 	private static function add_cap_to_role( string $role_slug, string $cap ): void {

@@ -6,7 +6,7 @@ namespace TEC_Scanner\Cli;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * `wp tec-scanner seed` — create a deterministic test event with tickets and
+ * `wp event-ticket-scanner seed` — create a deterministic test event with tickets and
  * attendees for exercising the scanner API. Everything it creates is tagged
  * with `_tec_scanner_seed` meta so `--fresh` can wipe and re-create.
  *

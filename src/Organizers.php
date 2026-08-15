@@ -28,7 +28,7 @@ final class Organizers {
 	public static function register_hooks(): void {
 		add_action( 'add_meta_boxes', [ self::class, 'add_meta_box' ] );
 		add_action( 'save_post_' . self::POST_TYPE, [ self::class, 'save_meta_box' ], 10, 2 );
-		add_action( 'tec_scanner_assignments_updated', [ self::class, 'flush_cache' ] );
+		add_action( 'event_ticket_scanner_assignments_updated', [ self::class, 'flush_cache' ] );
 	}
 
 	public static function flush_cache(): void {
@@ -135,7 +135,7 @@ final class Organizers {
 		 *
 		 * @param int $limit Maximum events.
 		 */
-		$limit = (int) apply_filters( 'tec_scanner_organizer_event_limit', 1000 );
+		$limit = (int) apply_filters( 'event_ticket_scanner_organizer_event_limit', 1000 );
 
 		// Deliberately a direct query: The Events Calendar joins its occurrences
 		// table into every WP_Query for tribe_events and silently drops past

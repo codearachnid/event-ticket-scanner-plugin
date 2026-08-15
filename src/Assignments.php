@@ -72,7 +72,7 @@ final class Assignments {
 		 * @param int[] $ids     Event IDs (direct assignments plus organizer links).
 		 * @param int   $user_id User ID.
 		 */
-		$ids = array_values( array_unique( array_map( 'intval', (array) apply_filters( 'tec_scanner_user_event_ids', $ids, $user_id ) ) ) );
+		$ids = array_values( array_unique( array_map( 'intval', (array) apply_filters( 'event_ticket_scanner_user_event_ids', $ids, $user_id ) ) ) );
 		sort( $ids );
 
 		return $ids;
@@ -147,10 +147,32 @@ final class Assignments {
 			]
 		);
 
+		$users = $query->get_results();
+		$seen  = array_map( static fn ( \WP_User $user ): int => (int) $user->ID, $users );
+
+		// Users granted the capability directly rather than through a role — an
+		// organizer's account, an event author staffing their own door. They can
+		// scan, so they belong on the management screen.
+		$direct = get_users(
+			[
+				'meta_key' => self::META_CAP_GRANTED, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'orderby'  => 'display_name',
+				'number'   => 500,
+			]
+		);
+
+		foreach ( $direct as $user ) {
+			if ( ! in_array( (int) $user->ID, $seen, true ) ) {
+				$users[] = $user;
+			}
+		}
+
 		$users = array_filter(
-			$query->get_results(),
+			$users,
 			static fn ( \WP_User $user ): bool => $user->has_cap( Plugin::CAP_CHECKIN )
 		);
+
+		usort( $users, static fn ( \WP_User $a, \WP_User $b ): int => strcasecmp( $a->display_name, $b->display_name ) );
 
 		return array_values( $users );
 	}
@@ -234,7 +256,7 @@ final class Assignments {
 		 * @param int   $user_id   User ID.
 		 * @param int[] $event_ids Assigned event IDs after the change.
 		 */
-		do_action( 'tec_scanner_assignments_updated', $user_id, $valid );
+		do_action( 'event_ticket_scanner_assignments_updated', $user_id, $valid );
 	}
 
 	/**

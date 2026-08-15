@@ -10,16 +10,32 @@ defined( 'ABSPATH' ) || exit;
  */
 final class Plugin {
 
-	public const CAP_CHECKIN = 'tec_scanner_checkin';
+	public const CAP_CHECKIN = 'event_ticket_scanner_checkin';
 
 	/** Bypasses per-event assignment — holder scans every event on the site. */
-	public const CAP_SCAN_ALL = 'tec_scanner_scan_all_events';
+	public const CAP_SCAN_ALL = 'event_ticket_scanner_scan_all_events';
 
 	/** Create scanner users, assign them to events, pair their devices. */
-	public const CAP_MANAGE = 'tec_scanner_manage_scanners';
+	public const CAP_MANAGE = 'event_ticket_scanner_manage_scanners';
+
+	/**
+	 * Pre-1.1 capability slugs, mapped onto the current ones on upgrade.
+	 * Capabilities live in the roles option and in per-user meta, so a rename
+	 * without this would revoke access from everyone holding them.
+	 *
+	 * @var array<string,string> Old slug => current slug.
+	 */
+	public const LEGACY_CAPS = [
+		'tec_scanner_checkin'          => self::CAP_CHECKIN,
+		'tec_scanner_scan_all_events'  => self::CAP_SCAN_ALL,
+		'tec_scanner_manage_scanners'  => self::CAP_MANAGE,
+	];
 
 	/** Purpose-built role: check-in only, restricted to assigned events. */
-	public const ROLE_SCANNER = 'tec_scanner';
+	public const ROLE_SCANNER = 'event_ticket_scanner';
+
+	/** Pre-1.1 role slug, migrated to ROLE_SCANNER on upgrade. */
+	public const ROLE_SCANNER_LEGACY = 'tec_scanner';
 
 	public const REST_NAMESPACE = 'tec-scanner/v1';
 
@@ -53,8 +69,10 @@ final class Plugin {
 		add_action( 'init', [ Capabilities::class, 'ensure_granted' ] );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			\WP_CLI::add_command( 'tec-scanner seed', Cli\SeedCommand::class );
-			\WP_CLI::add_command( 'tec-scanner scanner', Cli\ScannerCommand::class );
+			// Scanner management sits directly on the namespace — `event-ticket-scanner
+			// scanner create` would stutter — with seed added as a further subcommand.
+			\WP_CLI::add_command( 'event-ticket-scanner', Cli\ScannerCommand::class );
+			\WP_CLI::add_command( 'event-ticket-scanner seed', Cli\SeedCommand::class );
 		}
 	}
 
@@ -90,7 +108,7 @@ final class Plugin {
 		 *
 		 * @param bool $allow_insecure Defaults to true only for local/development environments.
 		 */
-		$allow_insecure = (bool) apply_filters( 'tec_scanner_allow_insecure_transport', $allow_insecure );
+		$allow_insecure = (bool) apply_filters( 'event_ticket_scanner_allow_insecure_transport', $allow_insecure );
 
 		return is_ssl() || $allow_insecure;
 	}

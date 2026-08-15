@@ -104,7 +104,7 @@ final class ScannerCandidates {
 		 * @param array $candidates Annotated candidates keyed by user ID.
 		 * @param int   $event_id   Event post ID.
 		 */
-		return (array) apply_filters( 'tec_scanner_event_candidates', $candidates, $event_id );
+		return (array) apply_filters( 'event_ticket_scanner_event_candidates', $candidates, $event_id );
 	}
 
 	/**

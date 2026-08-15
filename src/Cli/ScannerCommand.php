@@ -14,10 +14,10 @@ defined( 'ABSPATH' ) || exit;
  *
  * ## EXAMPLES
  *
- *     wp tec-scanner scanner create doorstaff --events=501,502
- *     wp tec-scanner scanner assign doorstaff 503
- *     wp tec-scanner scanner link-organizer 77 doorstaff
- *     wp tec-scanner scanner list
+ *     wp event-ticket-scanner create doorstaff --events=501,502
+ *     wp event-ticket-scanner assign doorstaff 503
+ *     wp event-ticket-scanner link-organizer 77 doorstaff
+ *     wp event-ticket-scanner list
  */
 final class ScannerCommand {
 

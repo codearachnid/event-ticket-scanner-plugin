@@ -62,7 +62,7 @@ A restricted account with no assignments sees nothing: an empty event list, `403
 | A lost phone | Revoke that one Application Password from the user's profile; other devices are unaffected. |
 | Pairing codes | 20 random bytes, stored SHA-256 hashed, single use, 5-minute TTL, consumed before any credential is minted, rate limited per IP. |
 | Transport | HTTPS enforced; plain HTTP refused outside `local`/`development` environments. |
-| Privilege | The `tec_scanner` role holds `read` and `tec_scanner_checkin`. Nothing else. |
+| Privilege | The `event_ticket_scanner` role holds `read` and `event_ticket_scanner_checkin`. Nothing else. |
 | Uninstall | Tables, capabilities, and role removed. |
 
 ## REST API
@@ -83,11 +83,11 @@ The contract is specified as OpenAPI and both this plugin and the mobile app are
 ## WP-CLI
 
 ```bash
-wp tec-scanner scanner create doorstaff --events=501,502
-wp tec-scanner scanner assign doorstaff 503
-wp tec-scanner scanner link-organizer 77 doorstaff
-wp tec-scanner scanner list
-wp tec-scanner seed --fresh --attendees=20   # test data
+wp event-ticket-scanner create doorstaff --events=501,502
+wp event-ticket-scanner assign doorstaff 503
+wp event-ticket-scanner link-organizer 77 doorstaff
+wp event-ticket-scanner list
+wp event-ticket-scanner seed --fresh --attendees=20   # test data
 ```
 
 ## Development
