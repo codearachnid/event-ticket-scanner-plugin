@@ -70,7 +70,7 @@ final class Plugin {
 			esc_html(
 				sprintf(
 					/* translators: %s: minimum Event Tickets version. */
-					__( 'TEC Ticket Scanner Companion requires the Event Tickets plugin (version %s or newer) to be installed and active.', 'wp-tec-ticket-scanner' ),
+					__( 'TEC Ticket Scanner Companion requires the Event Tickets plugin (version %s or newer) to be installed and active.', 'event-ticket-scanner' ),
 					TEC_SCANNER_MIN_ET_VERSION
 				)
 			)

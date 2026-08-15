@@ -90,7 +90,7 @@ final class Capabilities {
 	public static function register_role(): void {
 		$caps = self::scanner_role_caps();
 
-		add_role( Plugin::ROLE_SCANNER, __( 'Event Scanner', 'wp-tec-ticket-scanner' ), $caps );
+		add_role( Plugin::ROLE_SCANNER, __( 'Event Scanner', 'event-ticket-scanner' ), $caps );
 
 		$role = get_role( Plugin::ROLE_SCANNER );
 

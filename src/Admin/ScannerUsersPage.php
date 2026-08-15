@@ -42,8 +42,8 @@ final class ScannerUsersPage {
 		foreach ( $parents as $parent ) {
 			$hook = add_submenu_page(
 				$parent,
-				__( 'Scanners', 'wp-tec-ticket-scanner' ),
-				__( 'Scanners', 'wp-tec-ticket-scanner' ),
+				__( 'Scanners', 'event-ticket-scanner' ),
+				__( 'Scanners', 'event-ticket-scanner' ),
 				Plugin::CAP_MANAGE,
 				self::SLUG,
 				[ $this, 'render' ]
@@ -79,10 +79,10 @@ final class ScannerUsersPage {
 				'action'  => AjaxHandler::ACTION,
 				'nonce'   => wp_create_nonce( AjaxHandler::ACTION ),
 				'i18n'    => [
-					'expired' => __( 'This code expired. Generate a new one.', 'wp-tec-ticket-scanner' ),
+					'expired' => __( 'This code expired. Generate a new one.', 'event-ticket-scanner' ),
 					/* translators: %s: number of seconds remaining before the pairing code expires. */
-					'expires' => __( 'Code expires in %ss', 'wp-tec-ticket-scanner' ),
-					'error'   => __( 'Could not generate a pairing code.', 'wp-tec-ticket-scanner' ),
+					'expires' => __( 'Code expires in %ss', 'event-ticket-scanner' ),
+					'error'   => __( 'Could not generate a pairing code.', 'event-ticket-scanner' ),
 				],
 			]
 		);
@@ -193,65 +193,65 @@ final class ScannerUsersPage {
 		$events = Assignments::assignable_events( $assigned_everywhere );
 		?>
 		<div class="wrap tec-scanner-admin">
-			<h1><?php esc_html_e( 'Scanners', 'wp-tec-ticket-scanner' ); ?></h1>
+			<h1><?php esc_html_e( 'Scanners', 'event-ticket-scanner' ); ?></h1>
 			<p class="description">
-				<?php esc_html_e( 'Scanner accounts can only check attendees in — and only for the events assigned to them. Everything else on the site stays invisible to them, in the app and in the API.', 'wp-tec-ticket-scanner' ); ?>
+				<?php esc_html_e( 'Scanner accounts can only check attendees in — and only for the events assigned to them. Everything else on the site stays invisible to them, in the app and in the API.', 'event-ticket-scanner' ); ?>
 			</p>
 
 			<?php $this->render_notices(); ?>
 
 			<?php if ( ! $events ) : ?>
 				<div class="notice notice-warning inline"><p>
-					<?php esc_html_e( 'No upcoming events found to assign. Publish an event first.', 'wp-tec-ticket-scanner' ); ?>
+					<?php esc_html_e( 'No upcoming events found to assign. Publish an event first.', 'event-ticket-scanner' ); ?>
 				</p></div>
 			<?php endif; ?>
 
-			<h2><?php esc_html_e( 'Add a scanner', 'wp-tec-ticket-scanner' ); ?></h2>
+			<h2><?php esc_html_e( 'Add a scanner', 'event-ticket-scanner' ); ?></h2>
 			<form method="post" class="card tec-scanner-create">
 				<?php wp_nonce_field( self::NONCE_CREATE ); ?>
 				<input type="hidden" name="tec_scanner_action" value="create_user">
 
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><label for="scanner_login"><?php esc_html_e( 'Username', 'wp-tec-ticket-scanner' ); ?></label></th>
+						<th scope="row"><label for="scanner_login"><?php esc_html_e( 'Username', 'event-ticket-scanner' ); ?></label></th>
 						<td><input type="text" id="scanner_login" name="scanner_login" class="regular-text" required></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="scanner_display_name"><?php esc_html_e( 'Display name', 'wp-tec-ticket-scanner' ); ?></label></th>
+						<th scope="row"><label for="scanner_display_name"><?php esc_html_e( 'Display name', 'event-ticket-scanner' ); ?></label></th>
 						<td><input type="text" id="scanner_display_name" name="scanner_display_name" class="regular-text"></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="scanner_email"><?php esc_html_e( 'Email', 'wp-tec-ticket-scanner' ); ?></label></th>
+						<th scope="row"><label for="scanner_email"><?php esc_html_e( 'Email', 'event-ticket-scanner' ); ?></label></th>
 						<td>
 							<input type="email" id="scanner_email" name="scanner_email" class="regular-text">
-							<p class="description"><?php esc_html_e( 'Optional — devices are normally paired by QR code, so no login email is needed.', 'wp-tec-ticket-scanner' ); ?></p>
-							<label><input type="checkbox" name="scanner_notify" value="1"> <?php esc_html_e( 'Send them an account email', 'wp-tec-ticket-scanner' ); ?></label>
+							<p class="description"><?php esc_html_e( 'Optional — devices are normally paired by QR code, so no login email is needed.', 'event-ticket-scanner' ); ?></p>
+							<label><input type="checkbox" name="scanner_notify" value="1"> <?php esc_html_e( 'Send them an account email', 'event-ticket-scanner' ); ?></label>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Assigned events', 'wp-tec-ticket-scanner' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Assigned events', 'event-ticket-scanner' ); ?></th>
 						<td><?php $this->render_event_checkboxes( $events, [] ); ?></td>
 					</tr>
 				</table>
 
 				<p class="submit">
-					<button type="submit" class="button button-primary"><?php esc_html_e( 'Create scanner user', 'wp-tec-ticket-scanner' ); ?></button>
+					<button type="submit" class="button button-primary"><?php esc_html_e( 'Create scanner user', 'event-ticket-scanner' ); ?></button>
 				</p>
 			</form>
 
-			<h2><?php esc_html_e( 'Existing scanners', 'wp-tec-ticket-scanner' ); ?></h2>
+			<h2><?php esc_html_e( 'Existing scanners', 'event-ticket-scanner' ); ?></h2>
 
 			<?php if ( ! $users ) : ?>
-				<p><?php esc_html_e( 'No users can check attendees in yet.', 'wp-tec-ticket-scanner' ); ?></p>
+				<p><?php esc_html_e( 'No users can check attendees in yet.', 'event-ticket-scanner' ); ?></p>
 				<?php return; ?>
 			<?php endif; ?>
 
 			<table class="widefat striped tec-scanner-users">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'User', 'wp-tec-ticket-scanner' ); ?></th>
-						<th><?php esc_html_e( 'Events they can scan', 'wp-tec-ticket-scanner' ); ?></th>
-						<th><?php esc_html_e( 'Device', 'wp-tec-ticket-scanner' ); ?></th>
+						<th><?php esc_html_e( 'User', 'event-ticket-scanner' ); ?></th>
+						<th><?php esc_html_e( 'Events they can scan', 'event-ticket-scanner' ); ?></th>
+						<th><?php esc_html_e( 'Device', 'event-ticket-scanner' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -268,19 +268,19 @@ final class ScannerUsersPage {
 							<code><?php echo esc_html( $user->user_login ); ?></code><br>
 							<span class="description"><?php echo esc_html( implode( ', ', $user->roles ) ); ?></span>
 							<div class="row-actions">
-								<span><a href="<?php echo esc_url( get_edit_user_link( $user_id ) ); ?>"><?php esc_html_e( 'Edit user', 'wp-tec-ticket-scanner' ); ?></a></span>
+								<span><a href="<?php echo esc_url( get_edit_user_link( $user_id ) ); ?>"><?php esc_html_e( 'Edit user', 'event-ticket-scanner' ); ?></a></span>
 							</div>
 						</td>
 						<td>
 							<?php if ( $unrestricted ) : ?>
-								<p><em><?php esc_html_e( 'All events — this account has the site-wide scanning capability (administrator or editor). Use a dedicated Event Scanner account to restrict access.', 'wp-tec-ticket-scanner' ); ?></em></p>
+								<p><em><?php esc_html_e( 'All events — this account has the site-wide scanning capability (administrator or editor). Use a dedicated Event Scanner account to restrict access.', 'event-ticket-scanner' ); ?></em></p>
 							<?php else : ?>
 								<form method="post">
 									<?php wp_nonce_field( self::NONCE_ASSIGN ); ?>
 									<input type="hidden" name="tec_scanner_action" value="assign_events">
 									<input type="hidden" name="scanner_user_id" value="<?php echo esc_attr( (string) $user_id ); ?>">
 									<?php $this->render_event_checkboxes( $events, $current ); ?>
-									<p><button type="submit" class="button"><?php esc_html_e( 'Save assignments', 'wp-tec-ticket-scanner' ); ?></button></p>
+									<p><button type="submit" class="button"><?php esc_html_e( 'Save assignments', 'event-ticket-scanner' ); ?></button></p>
 								</form>
 								<?php $this->render_organizer_scope( $user_id, $derived ); ?>
 							<?php endif; ?>
@@ -292,7 +292,7 @@ final class ScannerUsersPage {
 								data-tec-scanner-pair
 								data-user-id="<?php echo esc_attr( (string) $user_id ); ?>"
 								data-target="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"
-							><?php esc_html_e( 'Pair a device', 'wp-tec-ticket-scanner' ); ?></button>
+							><?php esc_html_e( 'Pair a device', 'event-ticket-scanner' ); ?></button>
 							<div class="tec-scanner-qr-wrap">
 								<div id="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>" class="tec-scanner-qr"></div>
 								<p class="description" data-status-for="tec-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
@@ -312,7 +312,7 @@ final class ScannerUsersPage {
 	 */
 	private function render_event_checkboxes( array $events, array $selected ): void {
 		if ( ! $events ) {
-			echo '<p class="description">' . esc_html__( 'No events available.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p class="description">' . esc_html__( 'No events available.', 'event-ticket-scanner' ) . '</p>';
 			return;
 		}
 
@@ -362,14 +362,14 @@ final class ScannerUsersPage {
 			wp_kses_post(
 				sprintf(
 					/* translators: %s: organizer links. */
-					__( 'Also scans every event of organizer %s.', 'wp-tec-ticket-scanner' ),
+					__( 'Also scans every event of organizer %s.', 'event-ticket-scanner' ),
 					implode( ', ', $links )
 				)
 			),
 			esc_html(
 				sprintf(
 					/* translators: %d: number of events. */
-					_n( '%d additional event right now.', '%d additional events right now.', count( $derived ), 'wp-tec-ticket-scanner' ),
+					_n( '%d additional event right now.', '%d additional events right now.', count( $derived ), 'event-ticket-scanner' ),
 					count( $derived )
 				)
 			)
@@ -386,7 +386,7 @@ final class ScannerUsersPage {
 				esc_html(
 					sprintf(
 						/* translators: %s: user login. */
-						__( 'Scanner user %s created. Pair their device with the button below.', 'wp-tec-ticket-scanner' ),
+						__( 'Scanner user %s created. Pair their device with the button below.', 'event-ticket-scanner' ),
 						$user ? $user->user_login : ''
 					)
 				)
@@ -396,7 +396,7 @@ final class ScannerUsersPage {
 		if ( isset( $_GET['assigned'] ) ) {
 			printf(
 				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-				esc_html__( 'Event assignments saved.', 'wp-tec-ticket-scanner' )
+				esc_html__( 'Event assignments saved.', 'event-ticket-scanner' )
 			);
 		}
 
@@ -404,7 +404,7 @@ final class ScannerUsersPage {
 			$raw     = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
 			$message = '' !== $raw
 				? sanitize_text_field( rawurldecode( $raw ) )
-				: __( 'Could not complete that action.', 'wp-tec-ticket-scanner' );
+				: __( 'Could not complete that action.', 'event-ticket-scanner' );
 
 			printf( '<div class="notice notice-error is-dismissible"><p>%s</p></div>', esc_html( $message ) );
 		}

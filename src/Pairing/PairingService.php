@@ -63,7 +63,7 @@ final class PairingService {
 	 */
 	public function consume_token( string $token, string $device_name, string $client_ip ) {
 		if ( $this->rate_limited( $client_ip ) ) {
-			return new \WP_Error( 'tec_scanner_rate_limited', __( 'Too many pairing attempts. Try again in a few minutes.', 'wp-tec-ticket-scanner' ), [ 'status' => 429 ] );
+			return new \WP_Error( 'tec_scanner_rate_limited', __( 'Too many pairing attempts. Try again in a few minutes.', 'event-ticket-scanner' ), [ 'status' => 429 ] );
 		}
 
 		$this->count_attempt( $client_ip );
@@ -72,7 +72,7 @@ final class PairingService {
 		$record = get_transient( $key );
 
 		if ( ! is_array( $record ) || empty( $record['user_id'] ) ) {
-			return new \WP_Error( 'tec_scanner_invalid_token', __( 'This pairing code is invalid or has expired. Generate a fresh one in wp-admin.', 'wp-tec-ticket-scanner' ), [ 'status' => 403 ] );
+			return new \WP_Error( 'tec_scanner_invalid_token', __( 'This pairing code is invalid or has expired. Generate a fresh one in wp-admin.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
 		}
 
 		// Single use — consume before minting anything.
@@ -81,17 +81,17 @@ final class PairingService {
 		$user = get_userdata( (int) $record['user_id'] );
 
 		if ( ! $user || ! user_can( $user, Plugin::CAP_CHECKIN ) ) {
-			return new \WP_Error( 'tec_scanner_user_invalid', __( 'The pairing user no longer exists or lost check-in permission.', 'wp-tec-ticket-scanner' ), [ 'status' => 403 ] );
+			return new \WP_Error( 'tec_scanner_user_invalid', __( 'The pairing user no longer exists or lost check-in permission.', 'event-ticket-scanner' ), [ 'status' => 403 ] );
 		}
 
 		if ( ! wp_is_application_passwords_available_for_user( $user ) ) {
-			return new \WP_Error( 'tec_scanner_app_passwords_unavailable', __( 'Application passwords are not available for this user on this site.', 'wp-tec-ticket-scanner' ), [ 'status' => 501 ] );
+			return new \WP_Error( 'tec_scanner_app_passwords_unavailable', __( 'Application passwords are not available for this user on this site.', 'event-ticket-scanner' ), [ 'status' => 501 ] );
 		}
 
-		$device_name = sanitize_text_field( $device_name ) ?: __( 'Scanner device', 'wp-tec-ticket-scanner' );
+		$device_name = sanitize_text_field( $device_name ) ?: __( 'Scanner device', 'event-ticket-scanner' );
 		$label       = sprintf(
 			/* translators: 1: device name, 2: date. */
-			__( 'TEC Ticket Scanner — %1$s (%2$s)', 'wp-tec-ticket-scanner' ),
+			__( 'TEC Ticket Scanner — %1$s (%2$s)', 'event-ticket-scanner' ),
 			$device_name,
 			gmdate( 'Y-m-d H:i' )
 		);

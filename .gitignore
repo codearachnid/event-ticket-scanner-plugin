@@ -1,4 +1,4 @@
-# This repo IS the plugin — its root is wp-content/plugins/wp-tec-ticket-scanner,
+# This repo IS the plugin — its root is wp-content/plugins/event-ticket-scanner,
 # not a WordPress install. Do not paste WordPress core's .gitignore here: its
 # `/wp-*.php` rule silently excludes this plugin's own bootstrap file.
 

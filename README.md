@@ -1,1 +1,1 @@
-# wp-tec-ticket-scanner
+# Event Ticket Scanner

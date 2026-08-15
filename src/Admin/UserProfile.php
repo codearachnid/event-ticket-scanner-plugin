@@ -35,10 +35,10 @@ final class UserProfile {
 			return;
 		}
 
-		echo '<h2>' . esc_html__( 'Ticket scanner access', 'wp-tec-ticket-scanner' ) . '</h2>';
+		echo '<h2>' . esc_html__( 'Ticket scanner access', 'event-ticket-scanner' ) . '</h2>';
 
 		if ( Assignments::is_unrestricted( $user_id ) ) {
-			echo '<p>' . esc_html__( 'This account can scan every event on the site (it holds the site-wide scanning capability). Per-event assignments do not apply.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p>' . esc_html__( 'This account can scan every event on the site (it holds the site-wide scanning capability). Per-event assignments do not apply.', 'event-ticket-scanner' ) . '</p>';
 			return;
 		}
 
@@ -50,10 +50,10 @@ final class UserProfile {
 		?>
 		<table class="form-table" role="presentation">
 			<tr>
-				<th scope="row"><?php esc_html_e( 'Assigned events', 'wp-tec-ticket-scanner' ); ?></th>
+				<th scope="row"><?php esc_html_e( 'Assigned events', 'event-ticket-scanner' ); ?></th>
 				<td>
 					<?php if ( ! $events ) : ?>
-						<p class="description"><?php esc_html_e( 'No events available to assign.', 'wp-tec-ticket-scanner' ); ?></p>
+						<p class="description"><?php esc_html_e( 'No events available to assign.', 'event-ticket-scanner' ); ?></p>
 					<?php else : ?>
 						<fieldset class="tec-scanner-event-list">
 							<?php foreach ( $events as $event ) : ?>
@@ -66,14 +66,14 @@ final class UserProfile {
 						</fieldset>
 					<?php endif; ?>
 					<p class="description">
-						<?php esc_html_e( 'The scanner app and API expose only these events to this user.', 'wp-tec-ticket-scanner' ); ?>
+						<?php esc_html_e( 'The scanner app and API expose only these events to this user.', 'event-ticket-scanner' ); ?>
 						<?php if ( $derived ) : ?>
 							<br>
 							<?php
 							echo esc_html(
 								sprintf(
 									/* translators: %d: number of events. */
-									_n( 'Plus %d event inherited from a linked Organizer.', 'Plus %d events inherited from a linked Organizer.', count( $derived ), 'wp-tec-ticket-scanner' ),
+									_n( 'Plus %d event inherited from a linked Organizer.', 'Plus %d events inherited from a linked Organizer.', count( $derived ), 'event-ticket-scanner' ),
 									count( $derived )
 								)
 							);

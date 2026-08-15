@@ -10,7 +10,7 @@
  * Author URI:        https://eventticketscanner.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       wp-tec-ticket-scanner
+ * Text Domain:       event-ticket-scanner
  *
  * @package TEC_Scanner
  */

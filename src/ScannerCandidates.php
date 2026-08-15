@@ -57,21 +57,21 @@ final class ScannerCandidates {
 			$derived      = (bool) array_intersect( $organizer_ids, Organizers::organizer_ids_for_user( (int) $user_id ) );
 
 			if ( in_array( Plugin::ROLE_SCANNER, (array) $user->roles, true ) ) {
-				$reasons[] = __( 'Event Scanner', 'wp-tec-ticket-scanner' );
+				$reasons[] = __( 'Event Scanner', 'event-ticket-scanner' );
 			}
 
 			if ( $unrestricted ) {
-				$reasons[] = __( 'scans all events', 'wp-tec-ticket-scanner' );
+				$reasons[] = __( 'scans all events', 'event-ticket-scanner' );
 			}
 
 			if ( $derived ) {
-				$reasons[] = __( "this event's organizer", 'wp-tec-ticket-scanner' );
+				$reasons[] = __( "this event's organizer", 'event-ticket-scanner' );
 			} elseif ( Organizers::organizer_ids_for_user( (int) $user_id ) ) {
-				$reasons[] = __( 'linked organizer', 'wp-tec-ticket-scanner' );
+				$reasons[] = __( 'linked organizer', 'event-ticket-scanner' );
 			}
 
 			if ( $can_edit && ! $unrestricted ) {
-				$reasons[] = __( 'can edit this event', 'wp-tec-ticket-scanner' );
+				$reasons[] = __( 'can edit this event', 'event-ticket-scanner' );
 			}
 
 			if ( ! $reasons && ! $can_checkin ) {

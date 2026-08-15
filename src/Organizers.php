@@ -176,7 +176,7 @@ final class Organizers {
 
 		add_meta_box(
 			'tec-scanner-organizer-user',
-			__( 'Scanner access', 'wp-tec-ticket-scanner' ),
+			__( 'Scanner access', 'event-ticket-scanner' ),
 			[ self::class, 'render_meta_box' ],
 			self::POST_TYPE,
 			'side'
@@ -189,28 +189,28 @@ final class Organizers {
 
 		wp_nonce_field( 'tec_scanner_organizer_user', 'tec_scanner_organizer_nonce' );
 
-		echo '<p>' . esc_html__( 'Link this organizer to a user account. That user can scan every event listing this organizer, on top of any events assigned to them directly.', 'wp-tec-ticket-scanner' ) . '</p>';
+		echo '<p>' . esc_html__( 'Link this organizer to a user account. That user can scan every event listing this organizer, on top of any events assigned to them directly.', 'event-ticket-scanner' ) . '</p>';
 
 		wp_dropdown_users(
 			[
 				'name'              => 'tec_scanner_organizer_user',
 				'selected'          => $linked,
 				'include_selected'  => true,
-				'show_option_none'  => __( '— No linked user —', 'wp-tec-ticket-scanner' ),
+				'show_option_none'  => __( '— No linked user —', 'event-ticket-scanner' ),
 				'option_none_value' => 0,
 				'show'              => 'display_name_with_login',
 			]
 		);
 
 		if ( $linked && ! user_can( $linked, Plugin::CAP_CHECKIN ) ) {
-			echo '<p class="description tec-scanner-warning">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role under Events → Scanners.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p class="description tec-scanner-warning">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role under Events → Scanners.', 'event-ticket-scanner' ) . '</p>';
 		} elseif ( $linked ) {
 			printf(
 				'<p class="description">%s</p>',
 				esc_html(
 					sprintf(
 						/* translators: %d: number of events. */
-						_n( 'Currently grants access to %d event.', 'Currently grants access to %d events.', count( $events ), 'wp-tec-ticket-scanner' ),
+						_n( 'Currently grants access to %d event.', 'Currently grants access to %d events.', count( $events ), 'event-ticket-scanner' ),
 						count( $events )
 					)
 				)

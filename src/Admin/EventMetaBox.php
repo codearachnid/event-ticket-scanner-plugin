@@ -33,7 +33,7 @@ final class EventMetaBox {
 	public function add_meta_box(): void {
 		add_meta_box(
 			'tec-scanner-event-scanners',
-			__( 'Ticket Scanners', 'wp-tec-ticket-scanner' ),
+			__( 'Ticket Scanners', 'event-ticket-scanner' ),
 			[ $this, 'render' ],
 			self::POST_TYPE,
 			'side',
@@ -45,7 +45,7 @@ final class EventMetaBox {
 		$event_id = (int) $post->ID;
 
 		if ( ! current_user_can( 'edit_post', $event_id ) ) {
-			echo '<p>' . esc_html__( 'You cannot manage scanners for this event.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p>' . esc_html__( 'You cannot manage scanners for this event.', 'event-ticket-scanner' ) . '</p>';
 			return;
 		}
 
@@ -58,10 +58,10 @@ final class EventMetaBox {
 
 		wp_nonce_field( self::NONCE, 'tec_scanner_event_scanners_nonce' );
 
-		echo '<p class="description">' . esc_html__( 'Who can scan tickets at the door for this event.', 'wp-tec-ticket-scanner' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Who can scan tickets at the door for this event.', 'event-ticket-scanner' ) . '</p>';
 
 		if ( ! $candidates ) {
-			echo '<p>' . esc_html__( 'Nobody is available to assign yet. Create a scanner account under Events → Scanners.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p>' . esc_html__( 'Nobody is available to assign yet. Create a scanner account under Events → Scanners.', 'event-ticket-scanner' ) . '</p>';
 			return;
 		}
 
@@ -75,14 +75,14 @@ final class EventMetaBox {
 
 		printf(
 			'<p class="description">%s</p>',
-			esc_html__( 'Unrestricted accounts and this event\'s organizer already have access — they are shown for context and cannot be unassigned here.', 'wp-tec-ticket-scanner' )
+			esc_html__( 'Unrestricted accounts and this event\'s organizer already have access — they are shown for context and cannot be unassigned here.', 'event-ticket-scanner' )
 		);
 
 		if ( $can_grant ) {
 			printf(
 				'<p class="description"><a href="%s">%s</a></p>',
 				esc_url( ScannerUsersPage::page_url() ),
-				esc_html__( 'Manage scanner accounts', 'wp-tec-ticket-scanner' )
+				esc_html__( 'Manage scanner accounts', 'event-ticket-scanner' )
 			);
 		}
 	}
@@ -109,7 +109,7 @@ final class EventMetaBox {
 		if ( $can_grant && ! $candidate['can_checkin'] ) {
 			printf(
 				'<br><span class="description tec-scanner-grant-note">%s</span>',
-				esc_html__( 'Selecting them grants check-in access to their assigned events.', 'wp-tec-ticket-scanner' )
+				esc_html__( 'Selecting them grants check-in access to their assigned events.', 'event-ticket-scanner' )
 			);
 		}
 

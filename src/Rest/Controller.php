@@ -28,7 +28,7 @@ final class Controller {
 		if ( ! Plugin::transport_is_secure() ) {
 			return new \WP_Error(
 				'tec_scanner_insecure_transport',
-				__( 'The scanner API requires HTTPS.', 'wp-tec-ticket-scanner' ),
+				__( 'The scanner API requires HTTPS.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -36,7 +36,7 @@ final class Controller {
 		if ( ! is_user_logged_in() ) {
 			return new \WP_Error(
 				'rest_not_logged_in',
-				__( 'Authentication required (use an Application Password).', 'wp-tec-ticket-scanner' ),
+				__( 'Authentication required (use an Application Password).', 'event-ticket-scanner' ),
 				[ 'status' => 401 ]
 			);
 		}
@@ -44,7 +44,7 @@ final class Controller {
 		if ( ! current_user_can( Plugin::CAP_CHECKIN ) ) {
 			return new \WP_Error(
 				'tec_scanner_forbidden',
-				__( 'You are not allowed to manage check-ins on this site.', 'wp-tec-ticket-scanner' ),
+				__( 'You are not allowed to manage check-ins on this site.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -249,7 +249,7 @@ final class Controller {
 		if ( ! is_array( $operations ) || ! $operations || count( $operations ) > 100 ) {
 			return new \WP_Error(
 				'rest_invalid_param',
-				__( 'operations must be a non-empty array of at most 100 items.', 'wp-tec-ticket-scanner' ),
+				__( 'operations must be a non-empty array of at most 100 items.', 'event-ticket-scanner' ),
 				[ 'status' => 400 ]
 			);
 		}
@@ -261,7 +261,7 @@ final class Controller {
 				|| ! in_array( $op['action'], [ 'checkin', 'uncheckin' ], true ) ) {
 				return new \WP_Error(
 					'rest_invalid_param',
-					__( 'Each operation needs a uuid op_id, an attendee_id, and an action of checkin|uncheckin.', 'wp-tec-ticket-scanner' ),
+					__( 'Each operation needs a uuid op_id, an attendee_id, and an action of checkin|uncheckin.', 'event-ticket-scanner' ),
 					[ 'status' => 400 ]
 				);
 			}
@@ -281,7 +281,7 @@ final class Controller {
 		if ( ! Plugin::transport_is_secure() ) {
 			return new \WP_Error(
 				'tec_scanner_insecure_transport',
-				__( 'Pairing requires HTTPS.', 'wp-tec-ticket-scanner' ),
+				__( 'Pairing requires HTTPS.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -309,7 +309,7 @@ final class Controller {
 		if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
 			return new \WP_Error(
 				'tec_scanner_event_forbidden',
-				__( 'You are not assigned to scan this event.', 'wp-tec-ticket-scanner' ),
+				__( 'You are not assigned to scan this event.', 'event-ticket-scanner' ),
 				[ 'status' => 403 ]
 			);
 		}
@@ -326,7 +326,7 @@ final class Controller {
 	private function event_not_found(): \WP_Error {
 		return new \WP_Error(
 			'tec_scanner_event_not_found',
-			__( 'Event not found.', 'wp-tec-ticket-scanner' ),
+			__( 'Event not found.', 'event-ticket-scanner' ),
 			[ 'status' => 404 ]
 		);
 	}
