@@ -90,12 +90,12 @@ final class AdminPage {
 							<?php esc_html_e( 'This site is not served over HTTPS, so pairing and API access are disabled. Enable HTTPS (or the local-development filter) first.', 'wp-tec-ticket-scanner' ); ?>
 						</p></div>
 					<?php else : ?>
-						<div id="tec-scanner-qr-wrap">
-							<div id="tec-scanner-qr" aria-label="<?php esc_attr_e( 'Pairing QR code', 'wp-tec-ticket-scanner' ); ?>"></div>
-							<p id="tec-scanner-qr-status" class="description"></p>
+						<div class="tec-scanner-qr-wrap">
+							<div id="tec-scanner-qr" class="tec-scanner-qr" aria-label="<?php esc_attr_e( 'Pairing QR code', 'wp-tec-ticket-scanner' ); ?>"></div>
+							<p class="description" data-status-for="tec-scanner-qr"></p>
 						</div>
 						<p>
-							<button type="button" class="button button-primary" id="tec-scanner-generate">
+							<button type="button" class="button button-primary" data-tec-scanner-pair data-target="tec-scanner-qr">
 								<?php esc_html_e( 'Generate pairing code', 'wp-tec-ticket-scanner' ); ?>
 							</button>
 						</p>

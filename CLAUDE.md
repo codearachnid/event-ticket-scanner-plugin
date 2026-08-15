@@ -9,7 +9,8 @@ the contract's source of truth**; never change response shapes here without upda
 REST namespace `tec-scanner/v1`: `/me`, `/events`, `/events/{id}/attendees`
 (`updated_since` delta), `/events/{id}/stats`, `POST /checkins` (batch, idempotent by
 `op_id`), `POST /pair` (unauthenticated single-use-token → Application Password exchange).
-Plus the wp-admin pairing page (Tickets → Scanner App) and `wp tec-scanner seed`.
+Plus the wp-admin pairing page (Tickets → Scanner App), the Scanner Users page
+(Tickets → Scanner Users), `wp tec-scanner seed`, and `wp tec-scanner scanner`.
 
 ## Architecture notes (hard-won — don't re-derive)
 
@@ -37,6 +38,29 @@ Plus the wp-admin pairing page (Tickets → Scanner App) and `wp tec-scanner see
 - Capability: `tec_scanner_checkin` (administrator + editor on activation; filter
   `tec_scanner_checkin_roles`). HTTPS enforced except `wp_get_environment_type()`
   local/development (filter `tec_scanner_allow_insecure_transport`).
+- **Event scoping** (`src/Assignments.php`): a user is *unrestricted* with
+  `tec_scanner_scan_all_events` (admin/editor) or *restricted* to a scope =
+  direct assignments ∪ organizer-linked events. Enforced server-side in three
+  places, all of which must stay in sync: `/events` (`post__in`, and an early
+  empty response — `post__in => []` is IGNORED by WP_Query and would leak every
+  event), `Controller::guard_event()` (attendees + stats → 403
+  `tec_scanner_event_forbidden`), and `CheckinProcessor::apply()` (→
+  `not_authorized`). That check-in denial carries an internal `_no_store` flag so
+  it never lands in the idempotency ledger — the same `op_id` must still apply if
+  the operator is assigned afterwards.
+- Direct assignments = one user-meta row per event (`_tec_scanner_event_id`), not
+  a serialized array, so "who scans event X" is a plain meta query.
+- **Organizer links** (`src/Organizers.php`): `_tec_scanner_user_id` postmeta on a
+  `tribe_organizer` → that user scans every event with that `_EventOrganizerID`.
+  One user per organizer. The lookup is a **direct `$wpdb` query on purpose**: TEC
+  joins `wp_tec_occurrences` into every `WP_Query` for `tribe_events` and silently
+  drops past events (verified on TEC 6.x — a `meta_query` for `_EventOrganizerID`
+  returns nothing for past events), and scope must not depend on dates.
+- Role `tec_scanner` ("Event Scanner") = `read` + `tec_scanner_checkin`, nothing
+  else; `register_role()` actively strips `tec_scanner_scan_all_events` from it.
+  Managers hold `tec_scanner_manage_scanners` (administrator; filter
+  `tec_scanner_manager_roles`) — that cap gates the Scanner Users page, the
+  profile field, the organizer metabox, and pairing on behalf of another user.
 
 ## Dev environment
 

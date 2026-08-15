@@ -12,7 +12,7 @@
 	padding: 16px 20px;
 }
 
-#tec-scanner-qr {
+.tec-scanner-qr {
 	width: 280px;
 	height: 280px;
 	margin: 12px 0 4px;
@@ -26,17 +26,59 @@
 	box-sizing: content-box;
 }
 
-#tec-scanner-qr:empty::after {
+.tec-scanner-qr:empty::after {
 	content: '—';
 	color: #a7aaad;
 	font-size: 32px;
 }
 
-#tec-scanner-qr.is-expired {
+.tec-scanner-qr.is-expired {
 	opacity: 0.15;
 }
 
 .tec-scanner-status td:first-child {
 	width: 160px;
 	font-weight: 600;
+}
+
+/* Scanner Users screen */
+.tec-scanner-create {
+	padding: 4px 20px 12px;
+	max-width: 780px;
+}
+
+.tec-scanner-event-list {
+	max-height: 220px;
+	overflow-y: auto;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 8px 10px;
+	background: #fff;
+}
+
+.tec-scanner-event-list label {
+	display: block;
+	padding: 2px 0;
+}
+
+.tec-scanner-users td {
+	vertical-align: top;
+}
+
+.tec-scanner-users .tec-scanner-qr {
+	width: 180px;
+	height: 180px;
+	margin: 10px 0 4px;
+}
+
+.tec-scanner-users .tec-scanner-qr img,
+.tec-scanner-users .tec-scanner-qr canvas {
+	max-width: 100%;
+	height: auto;
+}
+
+.tec-scanner-derived {
+	margin-top: 8px;
+	border-left: 3px solid #dcdcde;
+	padding-left: 8px;
 }

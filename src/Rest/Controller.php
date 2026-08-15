@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace TEC_Scanner\Rest;
 
+use TEC_Scanner\Assignments;
 use TEC_Scanner\Attendees\AttendeeMapper;
 use TEC_Scanner\Attendees\Providers;
 use TEC_Scanner\Checkins\CheckinProcessor;
@@ -54,7 +55,8 @@ final class Controller {
 	/* ------------------------------------------------------------------ /me */
 
 	public function me(): \WP_REST_Response {
-		$user = wp_get_current_user();
+		$user         = wp_get_current_user();
+		$unrestricted = Assignments::is_unrestricted( (int) $user->ID );
 
 		return rest_ensure_response(
 			[
@@ -66,8 +68,11 @@ final class Controller {
 					'display_name' => $user->display_name,
 				],
 				'capabilities'          => [
-					'can_checkin' => current_user_can( Plugin::CAP_CHECKIN ),
+					'can_checkin'     => current_user_can( Plugin::CAP_CHECKIN ),
+					'scan_all_events' => $unrestricted,
 				],
+				// null = every event; a list = the only events this user may scan.
+				'assigned_event_ids'    => $unrestricted ? null : Assignments::for_user( (int) $user->ID ),
 				'plugin_version'        => TEC_SCANNER_VERSION,
 				'event_tickets_version' => defined( 'Tribe__Tickets__Main::VERSION' ) ? \Tribe__Tickets__Main::VERSION : '',
 				'providers'             => Providers::active_slugs(),
@@ -82,6 +87,23 @@ final class Controller {
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
 		$per_page = min( 200, max( 1, (int) $request->get_param( 'per_page' ) ) );
 
+		// Restricted users see only their assignments; with none, they see nothing.
+		if ( ! Assignments::is_unrestricted() ) {
+			$assigned = Assignments::for_user( get_current_user_id() );
+
+			if ( ! $assigned ) {
+				return rest_ensure_response(
+					[
+						'events'   => [],
+						'total'    => 0,
+						'page'     => $page,
+						'per_page' => $per_page,
+						'has_more' => false,
+					]
+				);
+			}
+		}
+
 		$args = [
 			'post_type'      => 'tribe_events',
 			'post_status'    => 'publish',
@@ -92,6 +114,10 @@ final class Controller {
 			'meta_key'       => '_EventStartDate',
 			'order'          => 'ASC',
 		];
+
+		if ( isset( $assigned ) ) {
+			$args['post__in'] = $assigned;
+		}
 
 		if ( $upcoming ) {
 			// End date in the future, with a 12h grace window for late scans.
@@ -142,9 +168,10 @@ final class Controller {
 
 	public function attendees( \WP_REST_Request $request ) {
 		$event_id = (int) $request['event_id'];
+		$denied   = $this->guard_event( $event_id );
 
-		if ( ! $this->event_exists( $event_id ) ) {
-			return $this->event_not_found();
+		if ( $denied ) {
+			return $denied;
 		}
 
 		$page     = max( 1, (int) $request->get_param( 'page' ) );
@@ -179,9 +206,10 @@ final class Controller {
 
 	public function stats( \WP_REST_Request $request ) {
 		$event_id = (int) $request['event_id'];
+		$denied   = $this->guard_event( $event_id );
 
-		if ( ! $this->event_exists( $event_id ) ) {
-			return $this->event_not_found();
+		if ( $denied ) {
+			return $denied;
 		}
 
 		$rows    = $this->mapper->format( $this->mapper->attendee_ids_for_event( $event_id ) );
@@ -268,6 +296,26 @@ final class Controller {
 	}
 
 	/* -------------------------------------------------------------- helpers */
+
+	/**
+	 * 404 for unknown events, 403 for events this user isn't assigned to.
+	 * Returns null when the request may proceed.
+	 */
+	private function guard_event( int $event_id ): ?\WP_Error {
+		if ( ! $this->event_exists( $event_id ) ) {
+			return $this->event_not_found();
+		}
+
+		if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
+			return new \WP_Error(
+				'tec_scanner_event_forbidden',
+				__( 'You are not assigned to scan this event.', 'wp-tec-ticket-scanner' ),
+				[ 'status' => 403 ]
+			);
+		}
+
+		return null;
+	}
 
 	private function event_exists( int $event_id ): bool {
 		$post = get_post( $event_id );

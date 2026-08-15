@@ -12,6 +12,15 @@ final class Plugin {
 
 	public const CAP_CHECKIN = 'tec_scanner_checkin';
 
+	/** Bypasses per-event assignment — holder scans every event on the site. */
+	public const CAP_SCAN_ALL = 'tec_scanner_scan_all_events';
+
+	/** Create scanner users, assign them to events, pair their devices. */
+	public const CAP_MANAGE = 'tec_scanner_manage_scanners';
+
+	/** Purpose-built role: check-in only, restricted to assigned events. */
+	public const ROLE_SCANNER = 'tec_scanner';
+
 	public const REST_NAMESPACE = 'tec-scanner/v1';
 
 	private static ?Plugin $instance = null;
@@ -34,11 +43,17 @@ final class Plugin {
 		( new Rest\Routes() )->register_hooks();
 		( new Pairing\AdminPage() )->register_hooks();
 		( new Pairing\AjaxHandler() )->register_hooks();
+		( new Admin\ScannerUsersPage() )->register_hooks();
+		( new Admin\UserProfile() )->register_hooks();
+
+		Assignments::register_hooks();
+		Organizers::register_hooks();
 
 		add_action( 'init', [ Capabilities::class, 'ensure_granted' ] );
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			\WP_CLI::add_command( 'tec-scanner seed', Cli\SeedCommand::class );
+			\WP_CLI::add_command( 'tec-scanner scanner', Cli\ScannerCommand::class );
 		}
 	}
 
