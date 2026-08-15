@@ -4,6 +4,7 @@
 .gitignore
 .distignore
 .github
+.wordpress-org
 CLAUDE.md
 README.md
 bin
