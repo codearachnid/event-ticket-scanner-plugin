@@ -1,5 +1,6 @@
 === Event Ticket Scanner ===
 Contributors: codearachnid
+Plugin URI: https://eventticketscanner.com/
 Tags: event tickets, the events calendar, check-in, qr code, tickets
 Requires at least: 6.8
 Tested up to: 7.0

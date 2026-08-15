@@ -1,12 +1,13 @@
 <?php
 /**
  * Plugin Name:       Event Ticket Scanner
- * Plugin URI:        https://github.com/codearachnid/wp-tec-ticket-scanner
+ * Plugin URI:        https://eventticketscanner.com/
  * Description:       Companion REST API for the TEC Ticket Scanner mobile app — offline-first attendee sync, batched check-ins, and QR pairing for Event Tickets.
  * Version:           1.1.0
  * Requires at least: 6.8
  * Requires PHP:      8.1
  * Author:            Timothy Wood (@codearachnid)
+ * Author URI:        https://eventticketscanner.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       wp-tec-ticket-scanner

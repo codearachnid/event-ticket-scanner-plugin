@@ -65,6 +65,7 @@ final class AdminPage {
 				'nonce'    => wp_create_nonce( AjaxHandler::ACTION ),
 				'i18n'     => [
 					'expired' => __( 'This code expired. Generate a new one.', 'wp-tec-ticket-scanner' ),
+					/* translators: %s: number of seconds remaining before the pairing code expires. */
 					'expires' => __( 'Code expires in %ss', 'wp-tec-ticket-scanner' ),
 					'error'   => __( 'Could not generate a pairing code.', 'wp-tec-ticket-scanner' ),
 				],

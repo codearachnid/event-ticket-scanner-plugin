@@ -97,12 +97,14 @@ final class Organizers {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT pm.meta_value
-				 FROM {$wpdb->postmeta} pm
-				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				'SELECT DISTINCT pm.meta_value
+				 FROM %i pm
+				 INNER JOIN %i p ON p.ID = pm.post_id
 				 WHERE pm.meta_key = %s
 				   AND p.post_type = %s
-				 LIMIT 500",
+				 LIMIT 500',
+				$wpdb->postmeta,
+				$wpdb->posts,
 				self::META_USER,
 				self::POST_TYPE
 			)
@@ -141,21 +143,24 @@ final class Organizers {
 		// an organizer keeps access to yesterday's event for late reconciliation.
 		global $wpdb;
 
-		$placeholders = implode( ',', array_fill( 0, count( $organizer_ids ), '%d' ) );
-
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$event_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT pm.post_id
-				 FROM {$wpdb->postmeta} pm
-				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-				 WHERE pm.meta_key = '_EventOrganizerID'
-				   AND pm.meta_value IN ({$placeholders})
-				   AND p.post_type = 'tribe_events'
-				   AND p.post_status = 'publish'
+				'SELECT DISTINCT pm.post_id
+				 FROM %i pm
+				 INNER JOIN %i p ON p.ID = pm.post_id
+				 WHERE pm.meta_key = %s
+				   AND pm.meta_value IN ('
+					. implode( ',', array_fill( 0, count( $organizer_ids ), '%d' ) ) . ')
+				   AND p.post_type = %s
+				   AND p.post_status = %s
 				 ORDER BY pm.post_id ASC
-				 LIMIT %d",
-				...array_merge( $organizer_ids, [ $limit ] )
+				 LIMIT %d',
+				array_merge(
+					[ $wpdb->postmeta, $wpdb->posts, '_EventOrganizerID' ],
+					$organizer_ids,
+					[ 'tribe_events', 'publish', $limit ]
+				)
 			)
 		);
 
@@ -198,7 +203,7 @@ final class Organizers {
 		);
 
 		if ( $linked && ! user_can( $linked, Plugin::CAP_CHECKIN ) ) {
-			echo '<p class="description" style="color:#b32d2e">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role (Users → Scanner Users) for the link to take effect.', 'wp-tec-ticket-scanner' ) . '</p>';
+			echo '<p class="description tec-scanner-warning">' . esc_html__( 'This user cannot check attendees in yet. Give them the Event Scanner role under Events → Scanners.', 'wp-tec-ticket-scanner' ) . '</p>';
 		} elseif ( $linked ) {
 			printf(
 				'<p class="description">%s</p>',

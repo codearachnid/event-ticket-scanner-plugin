@@ -81,12 +81,13 @@ final class TouchIndex {
 
 		$now = self::now();
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
-				'INSERT INTO ' . Schema::touch_table() . ' (attendee_id, event_id, touched_at)
+				'INSERT INTO %i (attendee_id, event_id, touched_at)
 				 VALUES (%d, %d, %s)
 				 ON DUPLICATE KEY UPDATE event_id = VALUES(event_id), touched_at = VALUES(touched_at)',
+				Schema::touch_table(),
 				$attendee_id,
 				$event_id,
 				$now
@@ -107,13 +108,14 @@ final class TouchIndex {
 
 		global $wpdb;
 
-		$placeholders = implode( ',', array_fill( 0, count( $attendee_ids ), '%d' ) );
+		$ids = array_map( 'intval', $attendee_ids );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				'SELECT attendee_id, touched_at FROM ' . Schema::touch_table() . " WHERE attendee_id IN ({$placeholders})",
-				...array_map( 'intval', $attendee_ids )
+				'SELECT attendee_id, touched_at FROM %i WHERE attendee_id IN ('
+					. implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')',
+				array_merge( [ Schema::touch_table() ], $ids )
 			),
 			ARRAY_A
 		);

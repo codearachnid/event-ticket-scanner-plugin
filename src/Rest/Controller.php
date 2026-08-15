@@ -358,12 +358,15 @@ final class Controller {
 		$touch_times = ( new \TEC_Scanner\TouchIndex() )->times_for( $ids );
 
 		global $wpdb;
-		$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$post_ids = array_map( 'intval', $ids );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$modified = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT ID, post_modified_gmt FROM {$wpdb->posts} WHERE ID IN ({$placeholders})",
-				...array_map( 'intval', $ids )
+				'SELECT ID, post_modified_gmt FROM %i WHERE ID IN ('
+					. implode( ',', array_fill( 0, count( $post_ids ), '%d' ) ) . ')',
+				array_merge( [ $wpdb->posts ], $post_ids )
 			),
 			OBJECT_K
 		);

@@ -80,6 +80,7 @@ final class ScannerUsersPage {
 				'nonce'   => wp_create_nonce( AjaxHandler::ACTION ),
 				'i18n'    => [
 					'expired' => __( 'This code expired. Generate a new one.', 'wp-tec-ticket-scanner' ),
+					/* translators: %s: number of seconds remaining before the pairing code expires. */
 					'expires' => __( 'Code expires in %ss', 'wp-tec-ticket-scanner' ),
 					'error'   => __( 'Could not generate a pairing code.', 'wp-tec-ticket-scanner' ),
 				],
@@ -322,8 +323,8 @@ final class ScannerUsersPage {
 			$start    = (string) get_post_meta( $event_id, '_EventStartDate', true );
 
 			printf(
-				'<label><input type="checkbox" name="scanner_events[]" value="%1$d"%2$s> %3$s <span class="description">%4$s</span></label>',
-				$event_id,
+				'<label><input type="checkbox" name="scanner_events[]" value="%1$s"%2$s> %3$s <span class="description">%4$s</span></label>',
+				esc_attr( (string) $event_id ),
 				in_array( $event_id, $selected, true ) ? ' checked' : '',
 				esc_html( html_entity_decode( get_the_title( $event ), ENT_QUOTES ) ),
 				esc_html( $start ? mysql2date( get_option( 'date_format' ), $start ) : '' )
@@ -400,8 +401,9 @@ final class ScannerUsersPage {
 		}
 
 		if ( isset( $_GET['error'] ) ) {
-			$message = isset( $_GET['message'] )
-				? sanitize_text_field( rawurldecode( wp_unslash( $_GET['message'] ) ) )
+			$raw     = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
+			$message = '' !== $raw
+				? sanitize_text_field( rawurldecode( $raw ) )
 				: __( 'Could not complete that action.', 'wp-tec-ticket-scanner' );
 
 			printf( '<div class="notice notice-error is-dismissible"><p>%s</p></div>', esc_html( $message ) );

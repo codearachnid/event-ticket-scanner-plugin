@@ -198,9 +198,9 @@ final class CheckinProcessor {
 	private function stored_result( string $op_id ): ?array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$json = $wpdb->get_var(
-			$wpdb->prepare( 'SELECT result FROM ' . Schema::ops_table() . ' WHERE op_id = %s', $op_id )
+			$wpdb->prepare( 'SELECT result FROM %i WHERE op_id = %s', Schema::ops_table(), $op_id )
 		);
 
 		if ( ! $json ) {

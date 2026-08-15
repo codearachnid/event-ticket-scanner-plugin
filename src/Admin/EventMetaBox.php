@@ -95,8 +95,8 @@ final class EventMetaBox {
 		$locked = $candidate['unrestricted'] || $candidate['derived'];
 
 		printf(
-			'<li><label><input type="checkbox" name="tec_scanner_event_scanners[]" value="%1$d"%2$s%3$s> %4$s</label>',
-			$user_id,
+			'<li><label><input type="checkbox" name="tec_scanner_event_scanners[]" value="%1$s"%2$s%3$s> %4$s</label>',
+			esc_attr( (string) $user_id ),
 			$locked || $candidate['assigned'] ? ' checked' : '',
 			$locked ? ' disabled' : '',
 			esc_html( $candidate['user']->display_name )
