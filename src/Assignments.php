@@ -27,6 +27,9 @@ final class Assignments {
 	/** Marks a check-in capability this plugin added to the user directly. */
 	public const META_CAP_GRANTED = '_event_ticket_scanner_cap_granted';
 
+	/** Marks an all-events capability this plugin added to the user directly. */
+	public const META_SCAN_ALL_GRANTED = '_event_ticket_scanner_scan_all_granted';
+
 	public static function register_hooks(): void {
 		// Don't leave assignments pointing at deleted events.
 		add_action( 'before_delete_post', [ self::class, 'purge_event' ] );
@@ -220,6 +223,83 @@ final class Assignments {
 		return $upcoming;
 	}
 
+	/**
+	 * Search events for the assignment pickers.
+	 *
+	 * A direct query on purpose: The Events Calendar joins its occurrences table
+	 * into every WP_Query for tribe_events and drops past events, but a past
+	 * event is exactly what you need to find when reconciling late scans.
+	 *
+	 * @return array<int, array{id:int,title:string,date:string}>
+	 */
+	public static function search_events( string $term, int $limit = 20 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$like  = '%' . $wpdb->esc_like( $term ) . '%';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT p.ID, p.post_title, COALESCE( m.meta_value, "" ) AS start_date
+				 FROM %i p
+				 LEFT JOIN %i m ON m.post_id = p.ID AND m.meta_key = %s
+				 WHERE p.post_type = %s
+				   AND p.post_status IN ( %s, %s, %s )
+				   AND p.post_title LIKE %s
+				 ORDER BY start_date DESC
+				 LIMIT %d',
+				[ $wpdb->posts, $wpdb->postmeta, '_EventStartDate', 'tribe_events', 'publish', 'draft', 'private', $like, $limit ]
+			)
+		);
+
+		return array_map(
+			static fn ( $row ): array => [
+				'id'    => (int) $row->ID,
+				'title' => html_entity_decode( $row->post_title, ENT_QUOTES ),
+				'date'  => $row->start_date ? mysql2date( get_option( 'date_format' ), $row->start_date ) : '',
+			],
+			(array) $rows
+		);
+	}
+
+	/**
+	 * Titles for a set of assigned events, for rendering chips without
+	 * loading the whole calendar.
+	 *
+	 * @param int[] $event_ids Event post IDs.
+	 * @return array<int, array{id:int,title:string,date:string}>
+	 */
+	public static function event_chips( array $event_ids ): array {
+		$event_ids = array_values( array_filter( array_map( 'intval', $event_ids ) ) );
+
+		if ( ! $event_ids ) {
+			return [];
+		}
+
+		_prime_post_caches( $event_ids, false, true );
+
+		$chips = [];
+
+		foreach ( $event_ids as $event_id ) {
+			$post = get_post( $event_id );
+
+			if ( ! $post ) {
+				continue;
+			}
+
+			$start = (string) get_post_meta( $event_id, '_EventStartDate', true );
+
+			$chips[] = [
+				'id'    => $event_id,
+				'title' => html_entity_decode( get_the_title( $post ), ENT_QUOTES ),
+				'date'  => $start ? mysql2date( get_option( 'date_format' ), $start ) : '',
+			];
+		}
+
+		return $chips;
+	}
+
 	/* -------------------------------------------------------------- writes */
 
 	/**
@@ -292,6 +372,49 @@ final class Assignments {
 			$user->remove_cap( Plugin::CAP_CHECKIN );
 			delete_user_meta( $user_id, self::META_CAP_GRANTED );
 		}
+	}
+
+	/**
+	 * Put a user in (or out of) "scans every event" mode.
+	 *
+	 * Deliberately a capability grant rather than assigning every event: the
+	 * grant stays true for events created later, and it stores one flag instead
+	 * of a row per event that would silently go stale. Only ever revokes a
+	 * capability this plugin granted, so role-derived access is untouched.
+	 */
+	public static function set_unrestricted( int $user_id, bool $unrestricted ): void {
+		$user = get_userdata( $user_id );
+
+		if ( ! $user ) {
+			return;
+		}
+
+		$granted = (bool) get_user_meta( $user_id, self::META_SCAN_ALL_GRANTED, true );
+
+		if ( $unrestricted ) {
+			if ( ! $granted && ! user_can( $user, Plugin::CAP_SCAN_ALL ) ) {
+				$user->add_cap( Plugin::CAP_SCAN_ALL );
+				update_user_meta( $user_id, self::META_SCAN_ALL_GRANTED, 1 );
+			}
+
+			// They also need to be able to check in at all.
+			if ( ! user_can( $user, Plugin::CAP_CHECKIN ) ) {
+				$user->add_cap( Plugin::CAP_CHECKIN );
+				update_user_meta( $user_id, self::META_CAP_GRANTED, 1 );
+			}
+
+			return;
+		}
+
+		if ( $granted ) {
+			$user->remove_cap( Plugin::CAP_SCAN_ALL );
+			delete_user_meta( $user_id, self::META_SCAN_ALL_GRANTED );
+		}
+	}
+
+	/** Whether all-events access came from this plugin (so it can be switched off here). */
+	public static function unrestricted_is_granted( int $user_id ): bool {
+		return (bool) get_user_meta( $user_id, self::META_SCAN_ALL_GRANTED, true );
 	}
 
 	/**

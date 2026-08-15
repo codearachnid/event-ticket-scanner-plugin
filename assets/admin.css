@@ -112,3 +112,102 @@
 .event-ticket-scanner-warning {
 	color: #b32d2e;
 }
+
+/* Assignment picker: chips + search */
+.event-ticket-scanner-scope {
+	margin: 0 0 8px;
+}
+
+.event-ticket-scanner-scope label {
+	margin-right: 14px;
+}
+
+.event-ticket-scanner-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.event-ticket-scanner-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	padding: 4px 6px 4px 10px;
+	background: #f0f0f1;
+	border: 1px solid #dcdcde;
+	border-radius: 12px;
+	font-size: 12px;
+	line-height: 1.6;
+}
+
+.event-ticket-scanner-chip-date {
+	color: #646970;
+}
+
+.event-ticket-scanner-chip-remove {
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+	color: #646970;
+	font-size: 16px;
+	line-height: 1;
+	padding: 0 2px;
+}
+
+.event-ticket-scanner-chip-remove:hover {
+	color: #b32d2e;
+}
+
+.event-ticket-scanner-search {
+	position: relative;
+	max-width: 420px;
+}
+
+.event-ticket-scanner-search input[type='search'] {
+	width: 100%;
+}
+
+.event-ticket-scanner-results {
+	position: absolute;
+	z-index: 10;
+	left: 0;
+	right: 0;
+	margin: 2px 0 0;
+	padding: 0;
+	list-style: none;
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	box-shadow: 0 2px 8px rgba( 0, 0, 0, 0.08 );
+	max-height: 220px;
+	overflow-y: auto;
+}
+
+.event-ticket-scanner-results li {
+	margin: 0;
+}
+
+.event-ticket-scanner-result {
+	display: block;
+	width: 100%;
+	text-align: left;
+	padding: 6px 10px;
+	border: 0;
+	background: transparent;
+	cursor: pointer;
+}
+
+.event-ticket-scanner-result:hover,
+.event-ticket-scanner-result:focus {
+	background: #f0f0f1;
+}
+
+.event-ticket-scanner-empty {
+	color: #646970;
+	font-style: italic;
+	margin: 0 0 8px;
+}

@@ -25,6 +25,8 @@ final class Assets {
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'action'  => AjaxHandler::ACTION,
 				'nonce'   => wp_create_nonce( AjaxHandler::ACTION ),
+				'searchAction' => EventSearch::ACTION,
+				'searchNonce'  => wp_create_nonce( EventSearch::ACTION ),
 				'i18n'    => [
 					'expired' => __( 'This code expired. Generate a new one.', 'event-ticket-scanner' ),
 					/* translators: %s: number of seconds remaining before the pairing code expires. */

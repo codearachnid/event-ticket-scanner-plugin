@@ -48,6 +48,7 @@ final class Plugin {
 		( new Admin\ScannerUsersPage() )->register_hooks();
 		( new Admin\UserProfile() )->register_hooks();
 		( new Admin\EventMetaBox() )->register_hooks();
+		( new Admin\EventSearch() )->register_hooks();
 
 		Assignments::register_hooks();
 		Organizers::register_hooks();

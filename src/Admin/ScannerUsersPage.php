@@ -129,7 +129,14 @@ final class ScannerUsersPage {
 			);
 		}
 
-		Assignments::set_for_user( (int) $user_id, $events );
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in handle_actions().
+		$scope = isset( $_POST['scanner_events_scope'] ) ? sanitize_key( wp_unslash( $_POST['scanner_events_scope'] ) ) : 'selected';
+
+		if ( 'all' === $scope ) {
+			Assignments::set_unrestricted( (int) $user_id, true );
+		} else {
+			Assignments::set_for_user( (int) $user_id, $events );
+		}
 
 		if ( $notify && $email ) {
 			wp_new_user_notification( (int) $user_id, null, 'user' );
@@ -144,13 +151,20 @@ final class ScannerUsersPage {
 		$events  = array_map( 'absint', (array) ( $_POST['scanner_events'] ?? [] ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- verified in handle_actions().
+		$scope = isset( $_POST['scanner_events_scope'] ) ? sanitize_key( wp_unslash( $_POST['scanner_events_scope'] ) ) : 'selected';
+
 		$user = $user_id ? get_userdata( $user_id ) : null;
 
 		if ( ! $user || ! user_can( $user, Plugin::CAP_CHECKIN ) ) {
 			$this->redirect( [ 'error' => 'unknown_user' ] );
 		}
 
-		Assignments::set_for_user( $user_id, $events );
+		Assignments::set_unrestricted( $user_id, 'all' === $scope );
+
+		if ( 'all' !== $scope ) {
+			Assignments::set_for_user( $user_id, $events );
+		}
 
 		$this->redirect( [ 'assigned' => $user_id ] );
 	}
@@ -220,14 +234,7 @@ final class ScannerUsersPage {
 	/* -------------------------------------------------------------- render */
 
 	public function render(): void {
-		$users  = Assignments::scanner_users();
-		$assigned_everywhere = [];
-
-		foreach ( $users as $user ) {
-			$assigned_everywhere = array_merge( $assigned_everywhere, Assignments::direct_for_user( (int) $user->ID ) );
-		}
-
-		$events = Assignments::assignable_events( $assigned_everywhere );
+		$users = Assignments::scanner_users();
 		?>
 		<div class="wrap event-ticket-scanner-admin">
 			<h1><?php esc_html_e( 'Scanners', 'event-ticket-scanner' ); ?></h1>
@@ -236,12 +243,6 @@ final class ScannerUsersPage {
 			</p>
 
 			<?php $this->render_notices(); ?>
-
-			<?php if ( ! $events ) : ?>
-				<div class="notice notice-warning inline"><p>
-					<?php esc_html_e( 'No upcoming events found to assign. Publish an event first.', 'event-ticket-scanner' ); ?>
-				</p></div>
-			<?php endif; ?>
 
 			<h2><?php esc_html_e( 'Add a scanner', 'event-ticket-scanner' ); ?></h2>
 			<form method="post" class="card event-ticket-scanner-create">
@@ -267,7 +268,7 @@ final class ScannerUsersPage {
 					</tr>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Assigned events', 'event-ticket-scanner' ); ?></th>
-						<td><?php $this->render_event_checkboxes( $events, [] ); ?></td>
+						<td><?php EventPicker::render( 'scanner_events', [] ); ?></td>
 					</tr>
 				</table>
 
@@ -296,8 +297,9 @@ final class ScannerUsersPage {
 					<?php
 					$user_id      = (int) $user->ID;
 					$unrestricted = Assignments::is_unrestricted( $user_id );
+					$granted_all  = Assignments::unrestricted_is_granted( $user_id );
 					$current      = Assignments::direct_for_user( $user_id );
-					$derived      = array_diff( Organizers::event_ids_for_user( $user_id ), $current );
+					$derived      = $granted_all ? [] : array_diff( Organizers::event_ids_for_user( $user_id ), $current );
 					?>
 					<tr>
 						<td>
@@ -309,14 +311,14 @@ final class ScannerUsersPage {
 							</div>
 						</td>
 						<td>
-							<?php if ( $unrestricted ) : ?>
-								<p><em><?php esc_html_e( 'All events — this account has the site-wide scanning capability (administrator or editor). Use a dedicated Event Scanner account to restrict access.', 'event-ticket-scanner' ); ?></em></p>
+							<?php if ( $unrestricted && ! $granted_all ) : ?>
+								<p><em><?php esc_html_e( 'All events — this account holds the site-wide scanning capability through its role (administrator or editor). Use a dedicated Event Scanner account to restrict access.', 'event-ticket-scanner' ); ?></em></p>
 							<?php else : ?>
 								<form method="post">
 									<?php wp_nonce_field( self::NONCE_ASSIGN ); ?>
 									<input type="hidden" name="event_ticket_scanner_action" value="assign_events">
 									<input type="hidden" name="scanner_user_id" value="<?php echo esc_attr( (string) $user_id ); ?>">
-									<?php $this->render_event_checkboxes( $events, $current ); ?>
+									<?php EventPicker::render( 'scanner_events', $current, $granted_all ); ?>
 									<p><button type="submit" class="button"><?php esc_html_e( 'Save assignments', 'event-ticket-scanner' ); ?></button></p>
 								</form>
 								<?php $this->render_organizer_scope( $user_id, $derived ); ?>
@@ -341,34 +343,6 @@ final class ScannerUsersPage {
 			</table>
 		</div>
 		<?php
-	}
-
-	/**
-	 * @param \WP_Post[] $events   Selectable events.
-	 * @param int[]      $selected Currently assigned event IDs.
-	 */
-	private function render_event_checkboxes( array $events, array $selected ): void {
-		if ( ! $events ) {
-			echo '<p class="description">' . esc_html__( 'No events available.', 'event-ticket-scanner' ) . '</p>';
-			return;
-		}
-
-		echo '<fieldset class="event-ticket-scanner-event-list">';
-
-		foreach ( $events as $event ) {
-			$event_id = (int) $event->ID;
-			$start    = (string) get_post_meta( $event_id, '_EventStartDate', true );
-
-			printf(
-				'<label><input type="checkbox" name="scanner_events[]" value="%1$s"%2$s> %3$s <span class="description">%4$s</span></label>',
-				esc_attr( (string) $event_id ),
-				in_array( $event_id, $selected, true ) ? ' checked' : '',
-				esc_html( html_entity_decode( get_the_title( $event ), ENT_QUOTES ) ),
-				esc_html( $start ? mysql2date( get_option( 'date_format' ), $start ) : '' )
-			);
-		}
-
-		echo '</fieldset>';
 	}
 
 	/**

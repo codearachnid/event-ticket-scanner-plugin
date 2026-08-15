@@ -43,7 +43,6 @@ final class UserProfile {
 		}
 
 		$direct  = Assignments::direct_for_user( $user_id );
-		$events  = Assignments::assignable_events( $direct );
 		$derived = array_diff( Organizers::event_ids_for_user( $user_id ), $direct );
 
 		wp_nonce_field( self::NONCE, 'event_ticket_scanner_user_events_nonce' );
@@ -52,19 +51,7 @@ final class UserProfile {
 			<tr>
 				<th scope="row"><?php esc_html_e( 'Assigned events', 'event-ticket-scanner' ); ?></th>
 				<td>
-					<?php if ( ! $events ) : ?>
-						<p class="description"><?php esc_html_e( 'No events available to assign.', 'event-ticket-scanner' ); ?></p>
-					<?php else : ?>
-						<fieldset class="event-ticket-scanner-event-list">
-							<?php foreach ( $events as $event ) : ?>
-								<?php $event_id = (int) $event->ID; ?>
-								<label>
-									<input type="checkbox" name="event_ticket_scanner_events[]" value="<?php echo esc_attr( (string) $event_id ); ?>" <?php checked( in_array( $event_id, $direct, true ) ); ?>>
-									<?php echo esc_html( html_entity_decode( get_the_title( $event ), ENT_QUOTES ) ); ?>
-								</label><br>
-							<?php endforeach; ?>
-						</fieldset>
-					<?php endif; ?>
+					<?php EventPicker::render( 'event_ticket_scanner_events', $direct, false, false ); ?>
 					<p class="description">
 						<?php esc_html_e( 'The scanner app and API expose only these events to this user.', 'event-ticket-scanner' ); ?>
 						<?php if ( $derived ) : ?>
