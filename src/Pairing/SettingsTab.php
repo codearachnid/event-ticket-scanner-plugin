@@ -3,87 +3,94 @@ declare(strict_types=1);
 
 namespace EventTicketScanner\Pairing;
 
+use EventTicketScanner\Admin\Assets;
 use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * "Scanner App" admin page: pair a phone by scanning a QR code.
- * Registered under the Event Tickets admin menu (falls back to Tools).
+ * "Scanner App" tab on the Event Tickets settings screen (Tickets → Settings),
+ * where devices are paired by QR code.
+ *
+ * A tab rather than its own menu entry: pairing is configuration, and it sits
+ * next to the rest of the ticketing setup instead of adding a top-level item.
  */
-final class AdminPage {
+final class SettingsTab {
 
-	public const SLUG = 'event-ticket-scanner-app';
+	public const TAB_ID = 'event-ticket-scanner';
 
-	private string $hook_suffix = '';
+	/** Event Tickets' settings page id — the tab only renders there. */
+	private const SETTINGS_PAGE = 'tec-tickets-settings';
 
 	public function register_hooks(): void {
-		add_action( 'admin_menu', [ $this, 'register_menu' ], 30 );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue' ] );
-	}
-
-	public function register_menu(): void {
-		$hook = add_submenu_page(
-			'tec-tickets',
-			__( 'Scanner App', 'event-ticket-scanner' ),
-			__( 'Scanner App', 'event-ticket-scanner' ),
-			Plugin::CAP_CHECKIN,
-			self::SLUG,
-			[ $this, 'render' ]
-		);
-
-		if ( ! $hook ) {
-			// Event Tickets menu not present (or renamed) — fall back to Tools.
-			$hook = add_submenu_page(
-				'tools.php',
-				__( 'Scanner App', 'event-ticket-scanner' ),
-				__( 'Scanner App', 'event-ticket-scanner' ),
-				Plugin::CAP_CHECKIN,
-				self::SLUG,
-				[ $this, 'render' ]
-			);
-		}
-
-		$this->hook_suffix = (string) $hook;
-	}
-
-	public function enqueue( string $hook_suffix ): void {
-		if ( $hook_suffix !== $this->hook_suffix ) {
+		// Only meaningful with Event Tickets' settings framework present.
+		if ( ! class_exists( 'Tribe__Settings_Tab' ) ) {
 			return;
 		}
 
-		wp_enqueue_script( 'event-ticket-scanner-qrcode', EVENT_TICKET_SCANNER_URL . 'assets/qrcode.min.js', [], EVENT_TICKET_SCANNER_VERSION, true );
-		wp_enqueue_script( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.js', [ 'event-ticket-scanner-qrcode' ], EVENT_TICKET_SCANNER_VERSION, true );
-		wp_enqueue_style( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.css', [], EVENT_TICKET_SCANNER_VERSION );
+		add_action( 'tribe_settings_do_tabs', [ $this, 'register_tab' ], 16 );
+		add_filter( 'tec_tickets_settings_tabs_ids', [ $this, 'add_tab_id' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue' ] );
+	}
 
-		wp_localize_script(
-			'event-ticket-scanner-admin',
-			'eventTicketScannerAdmin',
+	/** @param string $admin_page Settings page currently being built. */
+	public function register_tab( $admin_page ): void {
+		if ( ! empty( $admin_page ) && self::SETTINGS_PAGE !== $admin_page ) {
+			return;
+		}
+
+		if ( ! current_user_can( Plugin::CAP_CHECKIN ) ) {
+			return;
+		}
+
+		new \Tribe__Settings_Tab(
+			self::TAB_ID,
+			__( 'Scanner App', 'event-ticket-scanner' ),
 			[
-				'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
-				'action'   => AjaxHandler::ACTION,
-				'nonce'    => wp_create_nonce( AjaxHandler::ACTION ),
-				'i18n'     => [
-					'expired' => __( 'This code expired. Generate a new one.', 'event-ticket-scanner' ),
-					/* translators: %s: number of seconds remaining before the pairing code expires. */
-					'expires' => __( 'Code expires in %ss', 'event-ticket-scanner' ),
-					'error'   => __( 'Could not generate a pairing code.', 'event-ticket-scanner' ),
-				],
+				'priority'         => 30,
+				'show_save'        => false,
+				'display_callback' => [ $this, 'render' ],
 			]
 		);
+	}
+
+	/**
+	 * @param string[] $tabs Tab ids belonging to the Tickets settings screen.
+	 * @return string[]
+	 */
+	public function add_tab_id( $tabs ): array {
+		$tabs   = (array) $tabs;
+		$tabs[] = self::TAB_ID;
+
+		return $tabs;
+	}
+
+	public function enqueue(): void {
+		if ( ! $this->is_current_tab() ) {
+			return;
+		}
+
+		Assets::enqueue();
+	}
+
+	private function is_current_tab(): bool {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- reading the current screen, not acting.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		return self::SETTINGS_PAGE === $page && self::TAB_ID === $tab;
 	}
 
 	public function render(): void {
 		$secure = Plugin::transport_is_secure();
 		?>
-		<div class="wrap event-ticket-scanner-admin">
-			<h1><?php esc_html_e( 'Event Ticket Scanner', 'event-ticket-scanner' ); ?></h1>
-
+		<div class="event-ticket-scanner-admin">
 			<div class="event-ticket-scanner-columns">
 				<div class="card event-ticket-scanner-pair-card">
 					<h2><?php esc_html_e( 'Pair a scanning device', 'event-ticket-scanner' ); ?></h2>
 					<p>
-						<?php esc_html_e( 'Open the TEC Ticket Scanner app on the phone, choose "Scan pairing code", and point it at the QR code below. The device receives its own application password tied to your account — revoke it any time from your profile.', 'event-ticket-scanner' ); ?>
+						<?php esc_html_e( 'Open the Event Ticket Scanner app on the phone, choose "Scan pairing code", and point it at the QR code below. The device receives its own application password tied to your account — revoke it any time from your profile.', 'event-ticket-scanner' ); ?>
 					</p>
 
 					<?php if ( ! $secure ) : ?>
@@ -102,6 +109,11 @@ final class AdminPage {
 						</p>
 						<p class="description">
 							<?php esc_html_e( 'Codes are single-use and expire after 5 minutes. Anyone who scans one gets check-in access as you — only display it to people you trust.', 'event-ticket-scanner' ); ?>
+						</p>
+						<p>
+							<a href="<?php echo esc_url( \EventTicketScanner\Admin\ScannerUsersPage::page_url() ); ?>">
+								<?php esc_html_e( 'Pair a device for someone else, or manage scanner accounts', 'event-ticket-scanner' ); ?>
+							</a>
 						</p>
 					<?php endif; ?>
 				</div>

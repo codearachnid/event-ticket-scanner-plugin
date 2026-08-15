@@ -43,7 +43,7 @@ final class Plugin {
 	private function __construct() {
 		( new TouchIndex() )->register_hooks();
 		( new Rest\Routes() )->register_hooks();
-		( new Pairing\AdminPage() )->register_hooks();
+		( new Pairing\SettingsTab() )->register_hooks();
 		( new Pairing\AjaxHandler() )->register_hooks();
 		( new Admin\ScannerUsersPage() )->register_hooks();
 		( new Admin\UserProfile() )->register_hooks();

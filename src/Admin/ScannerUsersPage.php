@@ -5,7 +5,6 @@ namespace EventTicketScanner\Admin;
 
 use EventTicketScanner\Assignments;
 use EventTicketScanner\Organizers;
-use EventTicketScanner\Pairing\AjaxHandler;
 use EventTicketScanner\Plugin;
 
 defined( 'ABSPATH' ) || exit;
@@ -19,6 +18,11 @@ final class ScannerUsersPage {
 
 	public const SLUG = 'event-ticket-scanner-users';
 
+	/** Event Tickets' top-level menu and its Settings entry. */
+	private const PARENT_TICKETS = 'tec-tickets';
+
+	private const SETTINGS_SLUG = 'tec-tickets-settings';
+
 	private const NONCE_CREATE = 'event_ticket_scanner_create_user';
 
 	private const NONCE_ASSIGN = 'event_ticket_scanner_assign_events';
@@ -30,13 +34,15 @@ final class ScannerUsersPage {
 
 	public function register_hooks(): void {
 		add_action( 'admin_menu', [ $this, 'register_menu' ], 31 );
+		// Late, so Event Tickets has registered Settings by the time we move above it.
+		add_action( 'admin_menu', [ $this, 'reorder_menu' ], 999 );
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue' ] );
 	}
 
 	public function register_menu(): void {
-		// Sits beside Organizers and Venues in the Events menu — scanners are
-		// another thing you relate to an event, so they belong in the same list.
-		$parents = [ 'edit.php?post_type=' . EventMetaBox::POST_TYPE, 'tec-tickets', 'users.php' ];
+		// Lives with ticketing, not with the calendar: scanning is what happens to
+		// a ticket. Ordered above Settings by reorder_menu().
+		$parents = [ self::PARENT_TICKETS, 'edit.php?post_type=' . EventMetaBox::POST_TYPE, 'users.php' ];
 		$hook    = false;
 
 		foreach ( $parents as $parent ) {
@@ -67,25 +73,7 @@ final class ScannerUsersPage {
 			return;
 		}
 
-		wp_enqueue_script( 'event-ticket-scanner-qrcode', EVENT_TICKET_SCANNER_URL . 'assets/qrcode.min.js', [], EVENT_TICKET_SCANNER_VERSION, true );
-		wp_enqueue_script( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.js', [ 'event-ticket-scanner-qrcode' ], EVENT_TICKET_SCANNER_VERSION, true );
-		wp_enqueue_style( 'event-ticket-scanner-admin', EVENT_TICKET_SCANNER_URL . 'assets/admin.css', [], EVENT_TICKET_SCANNER_VERSION );
-
-		wp_localize_script(
-			'event-ticket-scanner-admin',
-			'eventTicketScannerAdmin',
-			[
-				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'action'  => AjaxHandler::ACTION,
-				'nonce'   => wp_create_nonce( AjaxHandler::ACTION ),
-				'i18n'    => [
-					'expired' => __( 'This code expired. Generate a new one.', 'event-ticket-scanner' ),
-					/* translators: %s: number of seconds remaining before the pairing code expires. */
-					'expires' => __( 'Code expires in %ss', 'event-ticket-scanner' ),
-					'error'   => __( 'Could not generate a pairing code.', 'event-ticket-scanner' ),
-				],
-			]
-		);
+		Assets::enqueue();
 	}
 
 	/* ------------------------------------------------------------- actions */
@@ -165,6 +153,55 @@ final class ScannerUsersPage {
 		Assignments::set_for_user( $user_id, $events );
 
 		$this->redirect( [ 'assigned' => $user_id ] );
+	}
+
+	/**
+	 * Put Scanners directly above Tickets → Settings.
+	 *
+	 * Event Tickets numbers its own pages (Home 1, Settings 2, Help 3), so
+	 * rather than guessing a position their next release may renumber, splice
+	 * ours in ahead of the Settings entry wherever it currently sits.
+	 */
+	public function reorder_menu(): void {
+		global $submenu;
+
+		if ( self::PARENT_TICKETS !== self::$parent || empty( $submenu[ self::PARENT_TICKETS ] ) ) {
+			return;
+		}
+
+		$ours  = null;
+		$items = [];
+
+		foreach ( $submenu[ self::PARENT_TICKETS ] as $item ) {
+			if ( isset( $item[2] ) && self::SLUG === $item[2] ) {
+				$ours = $item;
+				continue;
+			}
+
+			$items[] = $item;
+		}
+
+		if ( null === $ours ) {
+			return;
+		}
+
+		$rebuilt  = [];
+		$inserted = false;
+
+		foreach ( $items as $item ) {
+			if ( ! $inserted && isset( $item[2] ) && self::SETTINGS_SLUG === $item[2] ) {
+				$rebuilt[] = $ours;
+				$inserted  = true;
+			}
+
+			$rebuilt[] = $item;
+		}
+
+		if ( ! $inserted ) {
+			$rebuilt[] = $ours;
+		}
+
+		$submenu[ self::PARENT_TICKETS ] = $rebuilt;
 	}
 
 	/** Admin URL of this page, under whichever menu accepted it. */
