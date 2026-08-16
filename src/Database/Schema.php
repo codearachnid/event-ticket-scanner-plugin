@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Database;
+namespace EventTicketScanner\Database;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -10,13 +10,13 @@ final class Schema {
 	public static function touch_table(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'tec_scanner_touch';
+		return $wpdb->prefix . 'event_ticket_scanner_touch';
 	}
 
 	public static function ops_table(): string {
 		global $wpdb;
 
-		return $wpdb->prefix . 'tec_scanner_ops';
+		return $wpdb->prefix . 'event_ticket_scanner_ops';
 	}
 
 	public static function create_tables(): void {
@@ -57,9 +57,10 @@ final class Schema {
 	public static function drop_tables(): void {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::touch_table() );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( 'DROP TABLE IF EXISTS ' . self::ops_table() );
+		foreach ( [ self::touch_table(), self::ops_table() ] as $table ) {
+			// Dropping our own tables on uninstall is the point of this method.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+			$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $table ) );
+		}
 	}
 }

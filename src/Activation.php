@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner;
+namespace EventTicketScanner;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -11,7 +11,7 @@ final class Activation {
 		Database\Schema::create_tables();
 		Capabilities::grant();
 
-		update_option( 'tec_scanner_version', TEC_SCANNER_VERSION, false );
+		update_option( 'event_ticket_scanner_version', EVENT_TICKET_SCANNER_VERSION, false );
 
 		// Flush so the REST routes are immediately reachable.
 		flush_rewrite_rules();

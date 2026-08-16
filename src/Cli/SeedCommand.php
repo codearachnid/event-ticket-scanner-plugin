@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Cli;
+namespace EventTicketScanner\Cli;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * `wp tec-scanner seed` — create a deterministic test event with tickets and
+ * `wp event-ticket-scanner seed` — create a deterministic test event with tickets and
  * attendees for exercising the scanner API. Everything it creates is tagged
- * with `_tec_scanner_seed` meta so `--fresh` can wipe and re-create.
+ * with `_event_ticket_scanner_seed` meta so `--fresh` can wipe and re-create.
  *
  * Attendee posts are written with the exact provider meta keys the plugin
  * (and Event Tickets itself) reads, covering the contract's edge cases:
@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  */
 final class SeedCommand {
 
-	private const SEED_META = '_tec_scanner_seed';
+	private const SEED_META = '_event_ticket_scanner_seed';
 
 	/**
 	 * Seed the test event.
@@ -205,7 +205,7 @@ final class SeedCommand {
 			'_tec_tickets_commerce_event'          => $event_id,
 			'_tec_tickets_commerce_ticket'         => $ticket_id,
 			'_tec_tickets_commerce_order'          => $order_id,
-			'_tec_tickets_commerce_security_code'  => substr( md5( 'tec-scanner-seed-' . $index ), 0, 8 ),
+			'_tec_tickets_commerce_security_code'  => substr( md5( 'event-ticket-scanner-seed-' . $index ), 0, 8 ),
 			'_tec_tickets_commerce_status'         => $status,
 			'_tec_tickets_commerce_full_name'      => $name,
 			'_tec_tickets_commerce_email'          => $email,
@@ -249,7 +249,7 @@ final class SeedCommand {
 					self::SEED_META               => 1,
 					'_tribe_rsvp_event'           => $event_id,
 					'_tribe_rsvp_product'         => $ticket_id,
-					'_tribe_rsvp_security_code'   => substr( md5( 'tec-scanner-seed-rsvp-' . $index ), 0, 8 ),
+					'_tribe_rsvp_security_code'   => substr( md5( 'event-ticket-scanner-seed-rsvp-' . $index ), 0, 8 ),
 					'_tribe_rsvp_status'          => $going ? 'yes' : 'no',
 					'_tribe_rsvp_full_name'       => $name,
 					'_tribe_rsvp_email'           => $email,

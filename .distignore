@@ -1,0 +1,20 @@
+# Files that belong in the repo but never in the distributed plugin ZIP.
+# Keep in sync with anything Plugin Check flags as unexpected in a release.
+.git
+.gitignore
+.distignore
+.github
+.wordpress-org
+CLAUDE.md
+README.md
+bin
+tests
+phpunit.xml
+phpcs.xml
+composer.json
+composer.lock
+package.json
+package-lock.json
+node_modules
+vendor/bin
+*.zip

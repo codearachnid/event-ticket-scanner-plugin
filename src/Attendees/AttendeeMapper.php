@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Attendees;
+namespace EventTicketScanner\Attendees;
 
-use TEC_Scanner\TouchIndex;
+use EventTicketScanner\TouchIndex;
 
 defined( 'ABSPATH' ) || exit;
 

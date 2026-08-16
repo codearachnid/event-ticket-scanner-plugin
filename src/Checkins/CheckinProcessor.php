@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace TEC_Scanner\Checkins;
+namespace EventTicketScanner\Checkins;
 
-use TEC_Scanner\Attendees\AttendeeMapper;
-use TEC_Scanner\Attendees\Providers;
-use TEC_Scanner\Database\Schema;
+use EventTicketScanner\Assignments;
+use EventTicketScanner\Attendees\AttendeeMapper;
+use EventTicketScanner\Attendees\Providers;
+use EventTicketScanner\Database\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,8 +42,12 @@ final class CheckinProcessor {
 			$result = $this->apply( $op, $device_id );
 
 			// Terminal outcomes only — a transient `error` (e.g. provider
-			// misconfiguration) must stay retryable under the same op_id.
-			if ( 'error' !== $result['status'] ) {
+			// misconfiguration) or a permission denial (the operator may be
+			// assigned to the event later) must stay retryable under the op_id.
+			$storable = 'error' !== $result['status'] && empty( $result['_no_store'] );
+			unset( $result['_no_store'] );
+
+			if ( $storable ) {
 				$this->store_result( $op_id, $result );
 			}
 
@@ -67,6 +72,32 @@ final class CheckinProcessor {
 				'message'  => sprintf( 'No attendee with ID %d.', $attendee_id ),
 				'attendee' => null,
 			];
+		}
+
+		$event_id = (int) get_post_meta( $attendee_id, $config['event'], true );
+
+		// Assignment gate, for restricted operators only: they may touch just the
+		// attendees of events in their scope. Denials stay out of the idempotency
+		// ledger so the op still applies if the assignment is granted afterwards.
+		if ( ! Assignments::is_unrestricted() ) {
+			if ( ! $event_id ) {
+				// Attendee has no event to check scope against. That is a data
+				// fault, not a permission one — say so, and keep it retryable.
+				return $this->result(
+					$op_id,
+					'error',
+					'This attendee is not linked to an event, so scanning permission cannot be verified.',
+					$attendee_id
+				);
+			}
+
+			if ( ! Assignments::current_user_can_access_event( $event_id ) ) {
+				$result = $this->result( $op_id, 'not_authorized', 'You are not assigned to scan this event.', $attendee_id );
+
+				$result['_no_store'] = true;
+
+				return $result;
+			}
 		}
 
 		$checked_in = (bool) get_post_meta( $attendee_id, $config['checkin'], true );
@@ -102,8 +133,7 @@ final class CheckinProcessor {
 				return $this->result( $op_id, 'error', 'Could not resolve the ticket provider for this attendee (is the provider enabled in Event Tickets settings?).', $attendee_id );
 			}
 
-			$event_id = (int) get_post_meta( $attendee_id, $config['event'], true );
-			$done     = $provider->checkin( $attendee_id, true, $event_id );
+			$done = $provider->checkin( $attendee_id, true, $event_id );
 
 			if ( ! $done ) {
 				return $this->result( $op_id, 'error', 'Provider refused the check-in.', $attendee_id );
@@ -181,9 +211,9 @@ final class CheckinProcessor {
 	private function stored_result( string $op_id ): ?array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$json = $wpdb->get_var(
-			$wpdb->prepare( 'SELECT result FROM ' . Schema::ops_table() . ' WHERE op_id = %s', $op_id )
+			$wpdb->prepare( 'SELECT result FROM %i WHERE op_id = %s', Schema::ops_table(), $op_id )
 		);
 
 		if ( ! $json ) {
