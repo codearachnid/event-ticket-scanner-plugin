@@ -44,6 +44,8 @@
 			}, 1000 );
 		}
 
+		var wrap = qrEl.closest( '.event-ticket-scanner-qr-wrap' );
+
 		function generate() {
 			button.disabled = true;
 			setStatus( '…' );
@@ -85,6 +87,10 @@
 
 					qrEl.classList.remove( 'is-expired' );
 					qrEl.innerHTML = '';
+
+					if ( wrap ) {
+						wrap.hidden = false;
+					}
 					new QRCode( qrEl, {
 						text: text,
 						width: 280,
