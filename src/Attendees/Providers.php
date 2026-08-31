@@ -20,6 +20,7 @@ final class Providers {
 			// Tickets Commerce (free Event Tickets).
 			'tec_tc_attendee'      => [
 				'slug'          => 'tickets-commerce',
+				'order'         => '_tec_tickets_commerce_order',
 				'event'         => '_tec_tickets_commerce_event',
 				'ticket'        => '_tec_tickets_commerce_ticket',
 				'security'      => '_tec_tickets_commerce_security_code',
@@ -31,6 +32,7 @@ final class Providers {
 			// RSVP (free Event Tickets).
 			'tribe_rsvp_attendees' => [
 				'slug'          => 'rsvp',
+				'order'         => '', // RSVP has no order concept.
 				'event'         => '_tribe_rsvp_event',
 				'ticket'        => '_tribe_rsvp_product',
 				'security'      => '_tribe_rsvp_security_code',
@@ -42,6 +44,7 @@ final class Providers {
 			// WooCommerce tickets (Event Tickets Plus) — supported when present.
 			'tribe_wooticket'      => [
 				'slug'          => 'woocommerce',
+				'order'         => '_tribe_wooticket_order',
 				'event'         => '_tribe_wooticket_event',
 				'ticket'        => '_tribe_wooticket_product',
 				'security'      => '_tribe_wooticket_security_code',

@@ -148,6 +148,7 @@ final class Controller {
 				'end_date'         => (string) get_post_meta( $post->ID, '_EventEndDate', true ),
 				'timezone'         => (string) ( get_post_meta( $post->ID, '_EventTimezone', true ) ?: wp_timezone_string() ),
 				'venue'            => $venue_id ? html_entity_decode( get_the_title( $venue_id ), ENT_QUOTES ) : null,
+				'allow_walkup'     => '0' !== (string) get_post_meta( $post->ID, '_event_ticket_scanner_allow_walkup', true ),
 				'attendee_count'   => count( $rows ),
 				'checked_in_count' => count( array_filter( $rows, static fn ( array $r ) => $r['checked_in'] ) ),
 			];

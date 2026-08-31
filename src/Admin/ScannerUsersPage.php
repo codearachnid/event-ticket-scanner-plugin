@@ -245,7 +245,7 @@ final class ScannerUsersPage {
 			<?php $this->render_notices(); ?>
 
 			<h2><?php esc_html_e( 'Add a scanner', 'event-ticket-scanner' ); ?></h2>
-			<form method="post" class="card event-ticket-scanner-create">
+			<form method="post" class="event-ticket-scanner-panel event-ticket-scanner-create">
 				<?php wp_nonce_field( self::NONCE_CREATE ); ?>
 				<input type="hidden" name="event_ticket_scanner_action" value="create_user">
 
@@ -332,10 +332,10 @@ final class ScannerUsersPage {
 								data-user-id="<?php echo esc_attr( (string) $user_id ); ?>"
 								data-target="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"
 							><?php esc_html_e( 'Pair a device', 'event-ticket-scanner' ); ?></button>
-							<div class="event-ticket-scanner-qr-wrap">
+							<div class="event-ticket-scanner-qr-wrap" hidden>
 								<div id="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>" class="event-ticket-scanner-qr"></div>
-								<p class="description" data-status-for="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
 							</div>
+							<p class="description" data-status-for="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
 						</td>
 					</tr>
 				<?php endforeach; ?>

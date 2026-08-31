@@ -1,21 +1,44 @@
 .event-ticket-scanner-columns {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 16px;
-	align-items: flex-start;
+	display: grid;
+	grid-template-columns: repeat( auto-fit, minmax( 320px, 1fr ) );
+	gap: 20px;
+	align-items: start;
 	margin-top: 12px;
+	max-width: 1080px;
 }
 
-.event-ticket-scanner-columns .card {
-	flex: 1 1 380px;
-	max-width: 560px;
-	padding: 16px 20px;
+/* Own the panel chrome rather than borrowing core's .card, whose styling the
+   Event Tickets settings screen overrides. */
+.event-ticket-scanner-panel {
+	background: #fff;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 4px 20px 16px;
+	min-width: 0;
+}
+
+.event-ticket-scanner-panel h2 {
+	font-size: 14px;
+	margin: 16px 0 8px;
+}
+
+.event-ticket-scanner-panel p,
+.event-ticket-scanner-panel li {
+	font-size: 13px;
+}
+
+.event-ticket-scanner-panel ol {
+	margin-left: 18px;
+}
+
+.event-ticket-scanner-qr-wrap[hidden] {
+	display: none;
 }
 
 .event-ticket-scanner-qr {
-	width: 280px;
-	height: 280px;
-	margin: 12px 0 4px;
+	width: 220px;
+	height: 220px;
+	margin: 4px 0;
 	background: #fff;
 	display: flex;
 	align-items: center;
@@ -26,10 +49,10 @@
 	box-sizing: content-box;
 }
 
-.event-ticket-scanner-qr:empty::after {
-	content: '—';
-	color: #a7aaad;
-	font-size: 32px;
+.event-ticket-scanner-qr img,
+.event-ticket-scanner-qr canvas {
+	max-width: 100%;
+	height: auto;
 }
 
 .event-ticket-scanner-qr.is-expired {
@@ -43,7 +66,6 @@
 
 /* Scanner Users screen */
 .event-ticket-scanner-create {
-	padding: 4px 20px 12px;
 	max-width: 780px;
 }
 
@@ -66,8 +88,8 @@
 }
 
 .event-ticket-scanner-users .event-ticket-scanner-qr {
-	width: 180px;
-	height: 180px;
+	width: 160px;
+	height: 160px;
 	margin: 10px 0 4px;
 }
 
@@ -210,4 +232,53 @@
 	color: #646970;
 	font-style: italic;
 	margin: 0 0 8px;
+}
+
+.event-ticket-scanner-users th:first-child,
+.event-ticket-scanner-users td:first-child {
+	width: 220px;
+}
+
+.event-ticket-scanner-users th:last-child,
+.event-ticket-scanner-users td:last-child {
+	width: 200px;
+}
+
+.event-ticket-scanner-users [data-event-ticket-scanner-pair] {
+	white-space: nowrap;
+}
+
+/* Inside the Event Tickets settings screen the form is a two-column grid
+   (label column + field column). Without this the whole panel auto-places into
+   the field column and leaves a blank gutter beside it. Harmless elsewhere:
+   grid-column is ignored outside a grid container. */
+.event-ticket-scanner-admin {
+	grid-column: 1 / -1;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* Event Tickets styles headings inside its settings form; win on specificity
+   rather than fighting with !important. */
+.event-ticket-scanner-admin .event-ticket-scanner-panel h2 {
+	font-size: 15px;
+	line-height: 1.4;
+	margin: 14px 0 8px;
+	padding: 0;
+	font-weight: 600;
+}
+
+.event-ticket-scanner-admin .event-ticket-scanner-panel p,
+.event-ticket-scanner-admin .event-ticket-scanner-panel li {
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.event-ticket-scanner-admin .event-ticket-scanner-status code {
+	overflow-wrap: anywhere;
+	font-size: 11px;
+}
+
+.event-ticket-scanner-admin .event-ticket-scanner-status td:first-child {
+	width: 40%;
 }
