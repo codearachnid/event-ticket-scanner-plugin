@@ -58,6 +58,13 @@ final class EventMetaBox {
 
 		wp_nonce_field( self::NONCE, 'event_ticket_scanner_event_scanners_nonce' );
 
+		printf(
+			'<p><label><input type="checkbox" name="event_ticket_scanner_allow_walkup" value="1"%s> %s</label><br><span class="description">%s</span></p><hr>',
+			'0' !== (string) get_post_meta( $event_id, '_event_ticket_scanner_allow_walkup', true ) ? ' checked' : '',
+			esc_html__( 'Allow walk-up registration from the scanner app', 'event-ticket-scanner' ),
+			esc_html__( 'When off, the app hides its "Register walk-up" link for this event.', 'event-ticket-scanner' )
+		);
+
 		echo '<p class="description">' . esc_html__( 'Who can scan tickets at the door for this event.', 'event-ticket-scanner' ) . '</p>';
 
 		if ( ! $candidates ) {
@@ -129,6 +136,10 @@ final class EventMetaBox {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
+
+		// Stored inverted-ish ('0' = off, anything else = on) so events that
+		// predate the checkbox default to allowed without a backfill.
+		update_post_meta( $post_id, '_event_ticket_scanner_allow_walkup', isset( $_POST['event_ticket_scanner_allow_walkup'] ) ? '1' : '0' );
 
 		$can_grant = current_user_can( Plugin::CAP_MANAGE );
 
