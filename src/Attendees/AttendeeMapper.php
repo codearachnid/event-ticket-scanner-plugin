@@ -130,12 +130,33 @@ final class AttendeeMapper {
 			'holder_name'   => $holder_name,
 			'holder_email'  => $holder_email,
 			'security_code' => (string) get_post_meta( $attendee_id, $config['security'], true ),
+			'order_id'      => self::order_id( $post, $config ),
 			'order_status'  => Providers::normalize_status( $post->post_type, $attendee_id, $config ),
 			'checked_in'    => $checked_in,
 			'checked_in_at' => $checked_in_at,
 			'checked_in_by' => $checked_in_by ? (string) $checked_in_by : null,
 			'updated_at'    => self::updated_at( $post, $touched_at ),
 		];
+	}
+
+	/**
+	 * Order post ID shared by attendees bought together — the group
+	 * check-in key. Meta key wins; TC also parents attendees to the
+	 * order post, so post_parent is the fallback. Null when the
+	 * provider has no order concept (RSVP).
+	 */
+	private static function order_id( \WP_Post $post, array $config ): ?int {
+		$order_id = 0;
+
+		if ( ! empty( $config['order'] ) ) {
+			$order_id = (int) get_post_meta( $post->ID, $config['order'], true );
+		}
+
+		if ( ! $order_id && 'tec_tc_attendee' === $post->post_type ) {
+			$order_id = (int) $post->post_parent;
+		}
+
+		return $order_id ?: null;
 	}
 
 	/** Touch-index time wins; fall back to post_modified_gmt for untouched rows. */
