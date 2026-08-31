@@ -334,8 +334,8 @@ final class ScannerUsersPage {
 							><?php esc_html_e( 'Pair a device', 'event-ticket-scanner' ); ?></button>
 							<div class="event-ticket-scanner-qr-wrap" hidden>
 								<div id="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>" class="event-ticket-scanner-qr"></div>
-								<p class="description" data-status-for="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
 							</div>
+							<p class="description" data-status-for="event-ticket-scanner-qr-<?php echo esc_attr( (string) $user_id ); ?>"></p>
 						</td>
 					</tr>
 				<?php endforeach; ?>

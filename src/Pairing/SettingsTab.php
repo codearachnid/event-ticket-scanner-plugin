@@ -105,8 +105,8 @@ final class SettingsTab {
 						</p>
 						<div class="event-ticket-scanner-qr-wrap" hidden>
 							<div id="event-ticket-scanner-qr" class="event-ticket-scanner-qr" aria-label="<?php esc_attr_e( 'Pairing QR code', 'event-ticket-scanner' ); ?>"></div>
-							<p class="description" data-status-for="event-ticket-scanner-qr"></p>
 						</div>
+						<p class="description" data-status-for="event-ticket-scanner-qr"></p>
 						<p class="description">
 							<?php esc_html_e( 'Codes are single-use and expire after 5 minutes. Anyone who scans one gets check-in access as you — only display it to people you trust.', 'event-ticket-scanner' ); ?>
 						</p>
