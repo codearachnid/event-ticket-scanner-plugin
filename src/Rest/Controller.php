@@ -9,6 +9,7 @@ use EventTicketScanner\Attendees\Providers;
 use EventTicketScanner\Checkins\CheckinProcessor;
 use EventTicketScanner\Pairing\PairingService;
 use EventTicketScanner\Plugin;
+use EventTicketScanner\Registration\Registrar;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +19,7 @@ final class Controller {
 		private AttendeeMapper $mapper,
 		private CheckinProcessor $checkins,
 		private PairingService $pairing,
+		private Registrar $registrar,
 	) {
 	}
 
@@ -271,6 +273,65 @@ final class Controller {
 		return rest_ensure_response(
 			[
 				'results'     => $this->checkins->process_batch( $operations, $device_id ),
+				'server_time' => gmdate( 'Y-m-d\TH:i:s.v\Z' ),
+			]
+		);
+	}
+
+	/* ------------------------------------------------ /events/{id}/tickets */
+
+	public function tickets( \WP_REST_Request $request ) {
+		$event_id = (int) $request['event_id'];
+		$denied   = $this->guard_event( $event_id );
+
+		if ( $denied ) {
+			return $denied;
+		}
+
+		return rest_ensure_response( [ 'tickets' => $this->registrar->tickets_for_event( $event_id ) ] );
+	}
+
+	/* ----------------------------------------------- /events/{id}/register */
+
+	public function register_walkup( \WP_REST_Request $request ) {
+		$event_id = (int) $request['event_id'];
+		$denied   = $this->guard_event( $event_id );
+
+		if ( $denied ) {
+			return $denied;
+		}
+
+		if ( '0' === (string) get_post_meta( $event_id, '_event_ticket_scanner_allow_walkup', true ) ) {
+			return new \WP_Error(
+				'event_ticket_scanner_walkup_disabled',
+				__( 'Walk-up registration is disabled for this event.', 'event-ticket-scanner' ),
+				[ 'status' => 403 ]
+			);
+		}
+
+		$name = sanitize_text_field( (string) $request->get_param( 'name' ) );
+
+		if ( '' === $name ) {
+			return new \WP_Error( 'rest_invalid_param', __( 'name is required.', 'event-ticket-scanner' ), [ 'status' => 400 ] );
+		}
+
+		$attendee = $this->registrar->register(
+			$event_id,
+			(int) $request->get_param( 'ticket_id' ),
+			$name,
+			sanitize_email( (string) $request->get_param( 'email' ) ),
+			(string) $request->get_param( 'payment' ),
+			(bool) $request->get_param( 'check_in' ),
+			sanitize_text_field( (string) $request->get_param( 'device_id' ) )
+		);
+
+		if ( is_wp_error( $attendee ) ) {
+			return $attendee;
+		}
+
+		return rest_ensure_response(
+			[
+				'attendee'    => $attendee,
 				'server_time' => gmdate( 'Y-m-d\TH:i:s.v\Z' ),
 			]
 		);

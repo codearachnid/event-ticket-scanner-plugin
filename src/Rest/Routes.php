@@ -7,6 +7,7 @@ use EventTicketScanner\Attendees\AttendeeMapper;
 use EventTicketScanner\Checkins\CheckinProcessor;
 use EventTicketScanner\Pairing\PairingService;
 use EventTicketScanner\Plugin;
+use EventTicketScanner\Registration\Registrar;
 use EventTicketScanner\TouchIndex;
 
 defined( 'ABSPATH' ) || exit;
@@ -22,7 +23,7 @@ final class Routes {
 	public function __construct() {
 		$touch            = new TouchIndex();
 		$mapper           = new AttendeeMapper( $touch );
-		$this->controller = new Controller( $mapper, new CheckinProcessor( $mapper ), new PairingService() );
+		$this->controller = new Controller( $mapper, new CheckinProcessor( $mapper ), new PairingService(), new Registrar( $mapper ) );
 	}
 
 	public function register_hooks(): void {
@@ -79,6 +80,34 @@ final class Routes {
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => [ $this->controller, 'stats' ],
 				'permission_callback' => [ $this->controller, 'can_checkin' ],
+			]
+		);
+
+		register_rest_route(
+			$ns,
+			'/events/(?P<event_id>\d+)/tickets',
+			[
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => [ $this->controller, 'tickets' ],
+				'permission_callback' => [ $this->controller, 'can_checkin' ],
+			]
+		);
+
+		register_rest_route(
+			$ns,
+			'/events/(?P<event_id>\d+)/register',
+			[
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => [ $this->controller, 'register_walkup' ],
+				'permission_callback' => [ $this->controller, 'can_checkin' ],
+				'args'                => [
+					'ticket_id' => [ 'type' => 'integer', 'required' => true ],
+					'name'      => [ 'type' => 'string', 'required' => true ],
+					'email'     => [ 'type' => 'string', 'required' => false, 'default' => '' ],
+					'payment'   => [ 'type' => 'string', 'default' => 'cash', 'enum' => [ 'cash', 'comp' ] ],
+					'check_in'  => [ 'type' => 'boolean', 'default' => true ],
+					'device_id' => [ 'type' => 'string', 'required' => false, 'default' => '' ],
+				],
 			]
 		);
 
